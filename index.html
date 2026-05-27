@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#03040a" />
+    <title>Aurora Particle Lab</title>
+  </head>
+  <body>
+    <div id="webgl-stage" aria-hidden="true"></div>
+
+    <main class="interface">
+      <nav class="nav" aria-label="Primary">
+        <a class="brand" href="/" aria-label="Aurora Particle Lab home">
+          <span class="brand-glyph"></span>
+          <span>Aurora Particle Lab</span>
+        </a>
+        <a class="github-link" href="https://github.com/w0nderful666" target="_blank" rel="noreferrer">GitHub</a>
+        <div class="mode-switcher" aria-label="Preset">
+          <button class="mode-button is-active" type="button" data-preset="aurora" aria-label="Aurora preset" title="Aurora">Aurora</button>
+          <button class="mode-button" type="button" data-preset="signal" aria-label="Signal preset" title="Signal">Signal</button>
+          <button class="mode-button" type="button" data-preset="singularity" aria-label="Singularity preset" title="Singularity">Void</button>
+          <button class="mode-button" type="button" data-preset="solar" aria-label="Solar preset" title="Solar">Solar</button>
+          <button class="mode-button" type="button" data-preset="deep" aria-label="Deep preset" title="Deep">Deep</button>
+        </div>
+      </nav>
+
+      <div class="command-dock" aria-label="Live controls">
+        <button class="command-button" id="pulse-button" type="button" aria-label="Trigger pulse" title="Trigger pulse">
+          <span>Pulse</span>
+        </button>
+        <button class="command-button" id="prism-button" type="button" aria-label="Shift prism" title="Shift prism">
+          <span>Prism</span>
+        </button>
+        <button class="command-button" id="audio-button" type="button" aria-label="Enable audio reactive mode" title="Enable audio">
+          <span>Audio</span>
+        </button>
+      </div>
+
+      <aside class="telemetry" aria-label="Particle telemetry">
+        <div class="readout">
+          <span>Particles</span>
+          <strong id="particle-count">28,000</strong>
+        </div>
+        <div class="readout">
+          <span>Field</span>
+          <strong id="field-mode">Halo</strong>
+        </div>
+        <div class="readout">
+          <span>Gesture</span>
+          <strong id="gesture-state">Drift</strong>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
