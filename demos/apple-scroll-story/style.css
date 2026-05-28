@@ -1,0 +1,501 @@
+* { box-sizing: border-box; }
+
+:root {
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+  --ease-out: cubic-bezier(.25,.1,.25,1);
+  --ease-in-out: cubic-bezier(.4,0,.2,1);
+  --section-alt: rgba(0,0,0,0.015);
+  --section-glow-1: rgba(0,113,227,0.03);
+  --section-glow-2: rgba(0,113,227,0.05);
+  --nav-dot-active-shadow: 0 0 6px var(--accent);
+  --title-gradient-1: var(--fg);
+  --title-gradient-2: var(--fg);
+}
+
+[data-theme="dark"] {
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+  --section-alt: rgba(255,255,255,0.012);
+  --section-glow-1: rgba(41,151,255,0.02);
+  --section-glow-2: rgba(41,151,255,0.04);
+}
+
+body {
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  text-shadow: none;
+}
+
+/* ── Smooth section backgrounds ── */
+section:nth-child(even) {
+  background: var(--section-alt);
+}
+
+#chapter-1::before,
+#chapter-15::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--section-glow-2), transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Enhanced chapter reveal transitions ── */
+.chapter-number,
+.chapter-title,
+.chapter-text {
+  will-change: opacity, transform;
+}
+
+.chapter-title.revealed {
+  background: linear-gradient(135deg, var(--title-gradient-1), var(--title-gradient-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#chapter-1 .chapter-title.revealed {
+  --title-gradient-1: var(--accent);
+  --title-gradient-2: var(--fg);
+}
+
+/* ── Paragraph stagger refinement ── */
+.chapter-text {
+  transition: opacity 0.9s cubic-bezier(.25,.1,.25,1), transform 0.9s cubic-bezier(.25,.1,.25,1);
+}
+
+.chapter-text:nth-child(2) { transition-delay: 0.08s; }
+.chapter-text:nth-child(3) { transition-delay: 0.16s; }
+.chapter-text:nth-child(4) { transition-delay: 0.24s; }
+.chapter-text:nth-child(5) { transition-delay: 0.32s; }
+
+/* ── Premium theme toggle ── */
+#theme-toggle {
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 0.5px solid var(--nav-border);
+  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out), background 0.4s var(--ease-out);
+}
+
+#theme-toggle:active {
+  transform: scale(0.92);
+}
+
+#theme-toggle svg {
+  transition: transform 0.5s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
+}
+
+#theme-toggle:active svg {
+  transform: rotate(30deg);
+}
+
+/* ── Premium side navigation ── */
+#chapter-nav {
+  gap: 14px;
+}
+
+.nav-dot-wrapper {
+  transition: transform 0.25s var(--ease-out);
+}
+
+.nav-dot-wrapper:hover {
+  transform: translateX(2px);
+}
+
+.nav-dot {
+  border: 1.5px solid transparent;
+  transition: all 0.35s var(--ease-out);
+  position: relative;
+}
+
+.nav-dot.active {
+  box-shadow: var(--nav-dot-active-shadow);
+  border-color: var(--accent);
+}
+
+.nav-dot-wrapper:hover .nav-dot:not(.active) {
+  opacity: 0.5;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+
+.nav-dot-wrapper:hover .nav-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ── Elegant scroll indicator ── */
+.scroll-indicator {
+  opacity: 0.7;
+  transition: opacity 0.5s ease;
+}
+
+.scroll-indicator span {
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}
+
+.scroll-indicator .chevron {
+  width: 18px;
+  height: 18px;
+  border-width: 1.5px;
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fg-secondary);
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--fg-secondary) transparent;
+  }
+}
+
+/* ── Focus-visible accessibility ── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+#theme-toggle:focus-visible {
+  border-radius: 50%;
+}
+
+.nav-dot:focus-visible {
+  border-radius: 50%;
+  outline-offset: 4px;
+}
+
+/* ── Cursor glow refinement ── */
+#cursor-glow {
+  transition: opacity 0.6s ease;
+  mix-blend-mode: normal;
+}
+
+/* ── Smooth theme transition for all themed elements ── */
+section,
+.chapter-inner,
+.chapter-number,
+.chapter-title,
+.chapter-text,
+.nav-dot,
+.nav-label,
+.nav-dot-wrapper,
+#theme-toggle,
+#chapter-nav,
+.scroll-indicator,
+.parallax-circle,
+#cursor-glow {
+  transition: background 0.6s var(--ease-out),
+              color 0.6s var(--ease-out),
+              border-color 0.6s var(--ease-out),
+              box-shadow 0.6s var(--ease-out);
+}
+
+/* ── Parallax circle depth enhancement ── */
+.parallax-circle {
+  transition: transform 0.1s linear;
+}
+
+/* ── Subtle gradient overlay on sections for depth ── */
+section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to top, var(--bg), transparent);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+}
+
+section:nth-child(even)::after {
+  background: linear-gradient(to top, var(--section-alt), transparent);
+}
+
+/* ── Chapter separators visual enhancement ── */
+.chapter-separator {
+  background: linear-gradient(90deg, transparent, var(--fg-secondary), transparent);
+  opacity: 0.15;
+  height: 1px;
+}
+
+/* ── Hero section enhancements ── */
+#chapter-1 .chapter-inner {
+  padding-top: 40px;
+}
+
+#chapter-1 .chapter-text.revealed {
+  -webkit-text-fill-color: initial;
+  color: var(--fg-secondary);
+}
+
+/* ── Last chapter enhancements ── */
+#chapter-15 .chapter-text:last-of-type {
+  font-weight: 500;
+  color: var(--accent);
+  font-size: clamp(18px, 2.2vw, 24px);
+  margin-top: 32px;
+}
+
+/* ── Print styles ── */
+@media print {
+  #theme-toggle,
+  #chapter-nav,
+  #cursor-glow,
+  .parallax-bg,
+  .scroll-indicator,
+  section::after {
+    display: none !important;
+  }
+
+  section {
+    min-height: auto;
+    padding: 60px 0;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .chapter-number,
+  .chapter-title,
+  .chapter-text {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
+
+/* ── Tablet responsive ── */
+@media (max-width: 1024px) {
+  #chapter-nav {
+    left: 16px;
+    gap: 12px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-dot-wrapper:hover {
+    transform: none;
+  }
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 768px) {
+  section {
+    padding: 80px 20px;
+  }
+
+  #chapter-nav {
+    left: 12px;
+    gap: 10px;
+  }
+
+  .nav-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  #cursor-glow {
+    display: none;
+  }
+
+  #theme-toggle {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+
+  section::after {
+    height: 80px;
+  }
+
+  .chapter-separator {
+    margin-bottom: 32px;
+  }
+
+  #chapter-15 .chapter-text:last-of-type {
+    margin-top: 24px;
+  }
+}
+
+/* ── Small mobile responsive ── */
+@media (max-width: 480px) {
+  section {
+    padding: 60px 16px;
+  }
+
+  #chapter-nav {
+    left: 8px;
+    gap: 8px;
+  }
+
+  .nav-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  section::after {
+    height: 60px;
+  }
+
+  #chapter-15 .chapter-text:last-of-type {
+    margin-top: 20px;
+    font-size: clamp(16px, 4.5vw, 20px);
+  }
+}
+
+/* ── Touch device optimizations ── */
+@media (hover: none) and (pointer: coarse) {
+  #cursor-glow {
+    display: none;
+  }
+
+  #chapter-nav {
+    display: none;
+  }
+
+  #theme-toggle {
+    width: 48px;
+    height: 48px;
+    top: 16px;
+    right: 16px;
+  }
+
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (max-width: 768px) {
+  #theme-toggle {
+    width: 44px;
+    height: 44px;
+    top: 12px;
+    right: 12px;
+  }
+}
+
+/* ── Landscape mobile adjustments ── */
+@media (max-height: 500px) and (orientation: landscape) {
+  section {
+    min-height: 120vh;
+    padding: 100px 24px;
+  }
+
+  #chapter-nav {
+    gap: 8px;
+  }
+
+  .nav-dot {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) and (max-width: 768px) {
+  section {
+    padding: 80px 16px;
+  }
+}
+
+/* ── High-DPI display enhancements ── */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .nav-dot {
+    border-width: 1px;
+  }
+}
+
+/* ── Dark mode high-DPI ── */
+@media (-webkit-min-device-pixel-ratio: 2) and (prefers-color-scheme: dark),
+       (min-resolution: 192dpi) and (prefers-color-scheme: dark) {
+  #theme-toggle {
+    border-width: 0.5px;
+  }
+}
+
+/* ── Reduced motion override ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .chapter-number,
+  .chapter-title,
+  .chapter-text {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .parallax-circle {
+    display: none;
+  }
+
+  #cursor-glow {
+    display: none;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+
+  section::after {
+    display: none;
+  }
+}

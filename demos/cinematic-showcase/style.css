@@ -1,0 +1,771 @@
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #4fc3f7 #05070a;
+}
+
+body {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  background: #05070a;
+  color: #e8e8e8;
+  line-height: 1.9;
+  overflow-x: hidden;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #05070a; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4fc3f7, #7c4dff);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: #4fc3f7; }
+
+/* ─── Selection ─── */
+::selection { background: rgba(79, 195, 247, 0.3); color: #fff; }
+
+/* ─── Focus ─── */
+:focus-visible {
+  outline: 2px solid #4fc3f7;
+  outline-offset: 2px;
+  box-shadow: 0 0 16px rgba(79, 195, 247, 0.3);
+}
+
+button:focus:not(:focus-visible) { outline: none; }
+
+/* ─── Starfield Canvas ─── */
+#starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── Progress Bar ─── */
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #4fc3f7, #7c4dff, #e040fb);
+  z-index: 1001;
+  transition: width 0.1s linear;
+  box-shadow:
+    0 0 12px rgba(79, 195, 247, 0.5),
+    0 0 24px rgba(124, 77, 255, 0.3);
+  will-change: width;
+}
+
+/* ─── Cursor Glow ─── */
+#cursor-glow {
+  position: fixed;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79, 195, 247, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 999;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+  transition: opacity 0.3s;
+}
+
+/* ─── Chapter Navigation Dots ─── */
+#chapter-nav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#chapter-nav button {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  position: relative;
+}
+
+#chapter-nav button:hover,
+#chapter-nav button.active {
+  background: #4fc3f7;
+  border-color: #4fc3f7;
+  box-shadow: 0 0 8px rgba(79, 195, 247, 0.6);
+  transform: scale(1.3);
+}
+
+#chapter-nav button .dot-tooltip {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+#chapter-nav button:hover .dot-tooltip {
+  opacity: 1;
+}
+
+/* ─── Main Content ─── */
+main {
+  position: relative;
+  z-index: 1;
+  counter-reset: chapter-counter;
+}
+
+/* ─── Cinematic Vignette ─── */
+main::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 998;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+/* ─── Chapter Sections ─── */
+.chapter {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 24px;
+  overflow: hidden;
+  counter-increment: chapter-counter;
+}
+
+/* ─── Chapter Ambient Light ─── */
+.chapter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(79, 195, 247, 0.015) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chapter-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  width: 100%;
+}
+
+.chapter-title {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #4fc3f7 50%, #7c4dff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+.chapter-title::before {
+  content: "0" counter(chapter-counter, decimal-leading-zero);
+  display: block;
+  font-size: 0.35em;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  opacity: 0.25;
+  margin-bottom: 6px;
+  font-family: 'Playfair Display', serif;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.25);
+  background: none;
+}
+
+.chapter-sub {
+  font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+
+.chapter-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(79, 195, 247, 0.3), transparent);
+  margin: 20px 0 30px;
+  animation: dividerPulse 4s ease-in-out infinite;
+}
+
+.chapter p {
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.chapter p.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Parallax Background Container ─── */
+.chapter-parallax-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.chapter-parallax-bg > * {
+  position: absolute;
+  will-change: transform;
+}
+
+/* ─── Scroll Down Hint ─── */
+.chapter:first-child::after {
+  content: 'SCROLL';
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.2);
+  animation: scrollHint 2.5s ease-in-out infinite;
+  font-weight: 300;
+  z-index: 1;
+}
+
+/* ─── Chapter Transitions ─── */
+.chapter-transition {
+  height: 120px;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chapter-transition::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(5, 7, 10, 0.4) 50%, transparent 100%);
+}
+
+/* ─── Unique Visual Elements per Chapter ─── */
+
+/* Earth */
+.visual-earth {
+  position: absolute; top: 15%; right: -10%;
+  width: clamp(180px, 30vw, 360px); height: clamp(180px, 30vw, 360px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #4fc3f7, #0d47a1 60%, #1a237e);
+  box-shadow:
+    0 0 80px rgba(79, 195, 247, 0.15),
+    inset -20px -20px 60px rgba(0, 0, 0, 0.5);
+  opacity: 0.25;
+  animation: float 20s ease-in-out infinite, pulse 10s ease-in-out infinite;
+}
+
+.visual-earth::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent, transparent 30px,
+    rgba(79, 195, 247, 0.05) 30px,
+    rgba(79, 195, 247, 0.05) 31px
+  );
+}
+
+/* Moon */
+.visual-moon {
+  position: absolute; top: 10%; left: -8%;
+  width: clamp(140px, 22vw, 260px); height: clamp(140px, 22vw, 260px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #9e9e9e, #616161 50%, #424242);
+  box-shadow:
+    0 0 60px rgba(255, 255, 255, 0.05),
+    inset -15px -15px 40px rgba(0, 0, 0, 0.4);
+  opacity: 0.2;
+  animation: float 26s ease-in-out infinite, pulse 12s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+.visual-moon::after {
+  content: '';
+  position: absolute; top: 20%; left: 15%;
+  width: 30%; height: 30%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow:
+    8px 25px 0 -4px rgba(0, 0, 0, 0.15),
+    30px -5px 0 -8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mars */
+.visual-mars {
+  position: absolute; bottom: 10%; right: -5%;
+  width: clamp(160px, 25vw, 300px); height: clamp(160px, 25vw, 300px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 30%, #e57373, #c62828 50%, #4e3b31);
+  box-shadow:
+    0 0 60px rgba(229, 115, 115, 0.12),
+    inset -15px -15px 40px rgba(0, 0, 0, 0.3);
+  opacity: 0.2;
+  animation: float 18s ease-in-out infinite, pulse 8s ease-in-out infinite;
+  animation-delay: -2s;
+}
+
+/* Jupiter */
+.visual-jupiter {
+  position: absolute; top: 5%; left: -12%;
+  width: clamp(220px, 35vw, 400px); height: clamp(180px, 28vw, 320px);
+  border-radius: 50%;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent, transparent 8px,
+      rgba(188, 170, 140, 0.06) 8px,
+      rgba(188, 170, 140, 0.06) 10px,
+      transparent 10px, transparent 18px,
+      rgba(160, 120, 80, 0.04) 18px,
+      rgba(160, 120, 80, 0.04) 20px
+    );
+  background-color: rgba(188, 170, 140, 0.1);
+  box-shadow: 0 0 80px rgba(188, 170, 140, 0.08);
+  opacity: 0.25;
+  animation: float 30s ease-in-out infinite, pulse 14s ease-in-out infinite;
+}
+
+.visual-jupiter::after {
+  content: '';
+  position: absolute; bottom: 30%; left: 25%;
+  width: 40%; height: 12%;
+  border-radius: 50%;
+  background: rgba(180, 120, 60, 0.15);
+}
+
+/* Saturn */
+.visual-saturn {
+  position: absolute; top: 5%; right: -10%;
+  width: clamp(200px, 32vw, 380px); height: clamp(200px, 32vw, 380px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, rgba(210, 195, 160, 0.12), transparent 65%);
+  box-shadow: 0 0 40px rgba(210, 195, 160, 0.06);
+  opacity: 0.3;
+  animation: float 24s ease-in-out infinite, pulse 11s ease-in-out infinite;
+  animation-delay: -6s;
+}
+
+.visual-saturn::before {
+  content: '';
+  position: absolute; top: 2%; left: -20%;
+  width: 140%; height: 18%;
+  border-radius: 50%;
+  border: 2px solid rgba(210, 195, 160, 0.08);
+  transform: rotate(-20deg);
+}
+
+.visual-saturn::after {
+  content: '';
+  position: absolute; bottom: 10%; left: -15%;
+  width: 130%; height: 12%;
+  border-radius: 50%;
+  border: 2px solid rgba(210, 195, 160, 0.06);
+  transform: rotate(-20deg);
+}
+
+/* Asteroid Belt */
+.visual-asteroid {
+  position: absolute; top: 20%; left: 5%; right: 5%;
+  height: 100%;
+  opacity: 0.12;
+  animation: pulse 8s ease-in-out infinite;
+}
+
+.visual-asteroid span {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: #9e9e9e;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.visual-asteroid span:nth-child(odd) { animation-delay: -1s; }
+.visual-asteroid span:nth-child(3n) { animation-delay: -2s; }
+.visual-asteroid span:nth-child(5n) { animation-duration: 4s; }
+
+/* Galactic Center */
+.visual-galactic {
+  position: absolute; top: 5%; left: 5%; right: 5%; bottom: 5%;
+  background: radial-gradient(ellipse at center, rgba(255, 200, 100, 0.04) 0%, transparent 60%);
+  opacity: 0.3;
+  animation: shimmer 8s ease-in-out infinite;
+}
+
+.visual-galactic::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%; height: 60%;
+  background: radial-gradient(ellipse, rgba(200, 150, 255, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+/* Black Hole */
+.visual-blackhole {
+  position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
+  width: clamp(120px, 20vw, 240px); height: clamp(120px, 20vw, 240px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 0, 0, 0.8), transparent 60%);
+  box-shadow:
+    0 0 100px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(100, 50, 150, 0.1);
+  opacity: 0.3;
+  animation: pulse 9s ease-in-out infinite;
+}
+
+.visual-blackhole::before {
+  content: '';
+  position: absolute; top: -15%; left: -15%;
+  width: 130%; height: 130%;
+  border-radius: 50%;
+  border: 1px solid rgba(150, 80, 200, 0.06);
+  animation: spin 30s linear infinite;
+}
+
+.visual-blackhole::after {
+  content: '';
+  position: absolute; top: -30%; left: -30%;
+  width: 160%; height: 160%;
+  border-radius: 50%;
+  border: 1px solid rgba(150, 80, 200, 0.03);
+  animation: spin 20s linear infinite reverse;
+}
+
+/* Wormhole */
+.visual-wormhole {
+  position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
+  width: clamp(100px, 16vw, 200px); height: clamp(200px, 30vw, 360px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(100, 150, 255, 0.04) 0%, transparent 70%);
+  opacity: 0.2;
+  animation: breathe 8s ease-in-out infinite;
+}
+
+.visual-wormhole::after {
+  content: '';
+  position: absolute; top: -10%; left: -10%;
+  width: 120%; height: 120%;
+  border: 1px solid rgba(100, 150, 255, 0.04);
+  border-radius: 50%;
+}
+
+/* Dark Matter */
+.visual-darkmatter {
+  position: absolute; top: 10%; left: 5%; right: 5%; bottom: 10%;
+  opacity: 0.08;
+}
+
+.visual-darkmatter .dm-line {
+  position: absolute;
+  background: rgba(100, 100, 255, 0.04);
+  border-radius: 2px;
+}
+
+.visual-darkmatter .dm-line:nth-child(odd) { animation: shimmer 5s ease-in-out infinite; }
+.visual-darkmatter .dm-line:nth-child(even) { animation: shimmer 7s ease-in-out infinite; animation-delay: -2s; }
+
+/* Exoplanet */
+.visual-exoplanet {
+  position: absolute; top: 15%; right: -5%;
+  width: clamp(120px, 18vw, 200px); height: clamp(120px, 18vw, 200px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ce93d8, #6a1b9a 60%);
+  box-shadow:
+    0 0 60px rgba(206, 147, 216, 0.08),
+    inset -10px -10px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0.15;
+  animation: float 16s ease-in-out infinite, pulse 7s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+.visual-exoplanet::after {
+  content: '';
+  position: absolute; top: -20%; left: -10%;
+  width: 80%; height: 40%;
+  border-radius: 50%;
+  background: rgba(100, 150, 255, 0.03);
+  transform: rotate(-15deg);
+}
+
+/* Universe Edge */
+.visual-universe {
+  position: absolute; top: 5%; left: 5%; right: 5%; bottom: 5%;
+  background: radial-gradient(ellipse at 30% 40%, rgba(100, 150, 255, 0.02), transparent 60%);
+  opacity: 0.15;
+  animation: shimmer 12s ease-in-out infinite;
+}
+
+/* ─── Keyframe Animations ─── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.2; }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes scrollHint {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.15; }
+  50% { transform: translateX(-50%) translateY(6px); opacity: 0.45; }
+}
+
+@keyframes dividerPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.25; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes drift {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-20px); }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .chapter:first-child::after {
+    animation: none;
+    content: '↓';
+  }
+
+  .chapter p.visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ─── Responsive: Tablet ─── */
+@media (max-width: 768px) {
+  #chapter-nav {
+    right: 12px;
+    gap: 8px;
+  }
+
+  #chapter-nav button {
+    width: 8px;
+    height: 8px;
+  }
+
+  .chapter {
+    padding: 60px 16px;
+  }
+
+  .chapter-inner {
+    max-width: 100%;
+  }
+
+  #cursor-glow {
+    display: none;
+  }
+
+  #chapter-nav button .dot-tooltip {
+    display: none;
+  }
+
+  .chapter-transition {
+    height: 60px;
+  }
+}
+
+/* ─── Responsive: Mobile ─── */
+@media (max-width: 480px) {
+  .chapter {
+    padding: 40px 12px;
+    min-height: auto;
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .chapter-transition {
+    height: 40px;
+  }
+
+  #progress-bar {
+    height: 2px;
+  }
+
+  .chapter-title {
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+    letter-spacing: 1px;
+  }
+
+  .chapter-title::before {
+    font-size: 0.3em;
+    margin-bottom: 4px;
+  }
+
+  .chapter-sub {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  .chapter p {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+
+  .chapter-divider {
+    margin: 12px 0 20px;
+  }
+
+  #chapter-nav {
+    right: 8px;
+    gap: 6px;
+  }
+
+  #chapter-nav button {
+    width: 6px;
+    height: 6px;
+  }
+
+  .chapter:first-child::after {
+    display: none;
+  }
+}
+
+/* ─── Responsive: Small Mobile ─── */
+@media (max-width: 360px) {
+  .chapter {
+    padding: 32px 10px;
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
+  .chapter-title {
+    font-size: 1.5rem;
+  }
+
+  .chapter p {
+    font-size: 0.85rem;
+  }
+}
+
+/* ─── Responsive: Landscape Mobile ─── */
+@media (max-height: 500px) and (orientation: landscape) {
+  .chapter {
+    min-height: auto;
+    padding: 60px 16px;
+  }
+
+  .chapter-inner {
+    max-width: 600px;
+  }
+
+  #chapter-nav {
+    right: 10px;
+    gap: 6px;
+  }
+
+  #chapter-nav button {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* ─── Print Styles ─── */
+@media print {
+  #starfield,
+  #progress-bar,
+  #cursor-glow,
+  #chapter-nav,
+  .chapter-parallax-bg,
+  .chapter-transition {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .chapter {
+    min-height: auto;
+    padding: 20px 0;
+    page-break-inside: avoid;
+  }
+
+  .chapter p {
+    opacity: 1 !important;
+    transform: none !important;
+    color: #333;
+  }
+
+  .chapter-title {
+    -webkit-text-fill-color: #1a237e;
+    color: #1a237e;
+    background: none;
+  }
+}
