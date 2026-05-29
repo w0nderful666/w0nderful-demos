@@ -14,6 +14,8 @@ Interactive visual experiments built with Three.js, GSAP, and Canvas.
 | [Aurora Particle Lab](./demos/aurora-particle-lab/index.html) | WebGL-powered particle system with real-time controls | WebGL, Particles, 5 Presets |
 | [Cinematic Showcase](./demos/cinematic-showcase/index.html) | Immersive cosmic journey through the solar system | Canvas, Starfield, 12 Chapters |
 | [Particle Reshape](./demos/particle-reshape/index.html) | Three.js particle system with morphing capabilities | Three.js, 7 Shapes, Mouse Interaction |
+| [Silico](./demos/silico/index.html) | Satirical CPU product website — a parody of tech marketing hype | CSS Animations, Interactive UI, Dark Theme |
+| [Silico](./demos/silico/index.html) | Satirical CPU product website — a parody of tech marketing hype | CSS Animations, Interactive UI, Dark Theme |
 
 ## ✨ Features
 
