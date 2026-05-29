@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W0NDERFUL DEMOS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--bg2:#111;--text:#f5f5f7;--text2:#86868b;
+  --accent:#0071e3;--accent2:#2997ff;--glow:rgba(0,113,227,.4);
+  --card:rgba(255,255,255,.05);--border:rgba(255,255,255,.1);
+  --radius:16px;--font:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+}
+[data-theme="microsoft"]{
+  --bg:#1e1e1e;--bg2:#2d2d2d;--text:#fff;--text2:#a0a0a0;
+  --accent:#0078d4;--accent2:#60cdff;--glow:rgba(0,120,212,.4);
+  --card:rgba(0,120,212,.08);--border:rgba(255,255,255,.08);
+  --radius:4px;--font:'Segoe UI',sans-serif;
+}
+[data-theme="material"]{
+  --bg:#121212;--bg2:#1e1e1e;--text:#fff;--text2:#b0b0b0;
+  --accent:#1976d2;--accent2:#63a4ff;--glow:rgba(25,118,210,.4);
+  --card:rgba(255,255,255,.05);--border:rgba(255,255,255,.06);
+  --radius:8px;--font:'Roboto',sans-serif;
+}
+[data-theme="linux"]{
+  --bg:#0a0a0a;--bg2:#111;--text:#00ff41;--text2:#00cc33;
+  --accent:#00ff41;--accent2:#33ff66;--glow:rgba(0,255,65,.4);
+  --card:rgba(0,255,65,.05);--border:rgba(0,255,65,.2);
+  --radius:0;--font:'Courier New','Fira Code',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;cursor:none;transition:background .5s,color .5s}
+
+/* Cursor */
+.cursor{position:fixed;width:24px;height:24px;border:2px solid var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .2s,opacity .2s;mix-blend-mode:difference}
+.cursor-dot{position:fixed;width:6px;height:6px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999}
+
+/* Theme Switcher */
+.themes{position:fixed;top:24px;right:24px;z-index:100;display:flex;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:100px;backdrop-filter:blur(20px)}
+.themes button{width:28px;height:28px;border:none;border-radius:50%;cursor:pointer;transition:all .3s;position:relative}
+.themes button::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;transition:border-color .3s}
+.themes button.active::after{border-color:var(--accent)}
+.themes button:nth-child(1){background:linear-gradient(135deg,#1d1d1f,#0071e3)}
+.themes button:nth-child(2){background:linear-gradient(135deg,#0078d4,#8764b8)}
+.themes button:nth-child(3){background:linear-gradient(135deg,#1976d2,#0097a7)}
+.themes button:nth-child(4){background:linear-gradient(135deg,#0a0a0a,#00ff41)}
+
+/* Side Nav */
+.side-nav{position:fixed;left:24px;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:12px}
+.side-nav a{width:12px;height:12px;border:2px solid var(--text2);border-radius:50%;display:block;transition:all .3s;position:relative}
+.side-nav a::before{content:attr(data-label);position:absolute;left:20px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:11px;color:var(--text2);opacity:0;transition:opacity .3s;pointer-events:none}
+.side-nav a:hover::before{opacity:1}
+.side-nav a.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--glow)}
+
+/* Canvas */
+#canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+
+/* Sections */
+.section{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;padding:80px 40px}
+
+/* Hero */
+.hero{flex-direction:column;text-align:center}
+.hero h1{font-size:clamp(48px,10vw,96px);font-weight:700;letter-spacing:-2px;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,var(--accent),var(--accent2),#fff);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradient 3s ease infinite;opacity:0;transform:translateY(30px);transition:all 1s cubic-bezier(.16,1,.3,1)}
+.hero h1.active{opacity:1;transform:translateY(0)}
+.hero p{font-size:clamp(18px,3vw,24px);color:var(--text2);margin-bottom:48px;opacity:0;transform:translateY(20px);transition:all 1s cubic-bezier(.16,1,.3,1) .2s}
+.hero p.active{opacity:1;transform:translateY(0)}
+.hero .scroll-hint{opacity:0;transform:translateY(20px);transition:all 1s cubic-bezier(.16,1,.3,1) .4s}
+.hero .scroll-hint.active{opacity:1;transform:translateY(0)}
+.hero p{font-size:clamp(18px,3vw,24px);color:var(--text2);margin-bottom:48px}
+.scroll-hint{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text2);font-size:12px;letter-spacing:2px;text-transform:uppercase}
+.scroll-hint .arrow{width:1px;height:40px;background:linear-gradient(to bottom,var(--accent),transparent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.3;transform:scaleY(.5)}50%{opacity:1;transform:scaleY(1)}}
+
+/* Demo Cards */
+.demo{max-width:1200px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.demo:nth-child(even){direction:rtl}
+.demo:nth-child(even) > *{direction:ltr}
+.demo-info{display:flex;flex-direction:column;gap:16px}
+.demo-num{font-size:13px;color:var(--accent);font-weight:600;letter-spacing:1px;font-family:'SF Mono','Fira Code',monospace}
+.demo-title{font-size:clamp(32px,5vw,48px);font-weight:700;line-height:1.1;letter-spacing:-1px}
+.demo-desc{font-size:16px;color:var(--text2);line-height:1.6}
+.demo-tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{padding:6px 14px;background:var(--card);border:1px solid var(--border);border-radius:100px;font-size:12px;color:var(--text2);backdrop-filter:blur(10px);transition:all .3s}
+.tag:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.demo-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--accent);color:#fff;text-decoration:none;border-radius:var(--radius);font-weight:500;font-size:14px;transition:all .3s;border:none;cursor:pointer;width:fit-content}
+.demo-btn:hover{background:var(--accent2);transform:translateY(-2px);box-shadow:0 10px 30px var(--glow)}
+.demo-btn svg{width:16px;height:16px;transition:transform .3s}
+.demo-btn:hover svg{transform:translateX(4px)}
+
+/* Preview Cards */
+.preview{position:relative;aspect-ratio:16/10;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;backdrop-filter:blur(20px);transition:transform .5s,box-shadow .5s}
+.preview:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.preview-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(135deg,var(--card),transparent);transition:transform .5s}
+.preview:hover .preview-inner{transform:scale(1.1)}
+.preview-glow{position:absolute;width:200px;height:200px;background:var(--accent);border-radius:50%;filter:blur(80px);opacity:.2;transition:all .5s}
+.preview:hover .preview-glow{opacity:.4;transform:scale(1.2)}
+.preview-glow.tl{top:-50px;left:-50px}
+.preview-glow.br{bottom:-50px;right:-50px}
+
+/* Preview border gradient */
+.preview::before{content:'';position:absolute;inset:-1px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),transparent,var(--accent2));z-index:-1;opacity:0;transition:opacity .5s}
+.preview:hover::before{opacity:.5}
+
+/* Animated gradient border on hover */
+.preview::after{content:'';position:absolute;inset:0;border-radius:var(--radius);background:linear-gradient(var(--bg),var(--bg)) padding-box,linear-gradient(135deg,var(--accent),var(--accent2)) border-box;border:2px solid transparent;opacity:0;transition:opacity .5s}
+.preview:hover::after{opacity:1}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:32px}
+.stat{padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);text-align:center;transition:all .3s;position:relative;overflow:hidden}
+.stat:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.stat::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);transition:left .5s}
+.stat:hover::before{left:100%}
+.stat-num{font-size:32px;font-weight:700;color:var(--accent);font-family:'SF Mono','Fira Code',monospace}
+.stat-label{font-size:12px;color:var(--text2);margin-top:8px;text-transform:uppercase;letter-spacing:1px}
+
+/* Progress Bar */
+.progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:100;transition:width .1s}
+
+/* Scroll Top */
+.scroll-top{position:fixed;bottom:24px;right:24px;width:48px;height:48px;background:var(--card);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:100;opacity:0;transform:translateY(20px);transition:all .3s;backdrop-filter:blur(20px)}
+.scroll-top.visible{opacity:1;transform:translateY(0)}
+.scroll-top:hover{background:var(--accent);border-color:var(--accent)}
+.scroll-top svg{width:20px;height:20px;color:var(--text)}
+
+/* Footer */
+.footer{flex-direction:column;text-align:center;gap:24px}
+.footer h2{font-size:clamp(32px,5vw,48px);font-weight:600}
+.footer p{color:var(--text2)}
+.footer-links{display:flex;gap:16px;margin-top:16px}
+.footer-links a{padding:12px 28px;background:transparent;border:1px solid var(--border);color:var(--text);text-decoration:none;border-radius:var(--radius);transition:all .3s}
+.footer-links a:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* Glow Line */
+.glow-line{position:absolute;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.3}
+
+/* Theme-specific enhancements */
+[data-theme="microsoft"] .demo-btn{border-radius:4px;font-family:'Segoe UI',sans-serif}
+[data-theme="microsoft"] .stat{border-radius:4px}
+[data-theme="microsoft"] .footer-links a{border-radius:4px}
+[data-theme="microsoft"] .preview{border-radius:4px}
+[data-theme="microsoft"] .tag{border-radius:4px}
+
+[data-theme="material"] .demo-btn{border-radius:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+[data-theme="material"] .tag{border-radius:4px}
+[data-theme="material"] .stat{border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+[data-theme="material"] .stat:hover{box-shadow:0 8px 16px rgba(0,0,0,.3)}
+[data-theme="material"] .preview{border-radius:8px}
+
+[data-theme="linux"] .demo-btn{border:1px solid var(--accent);background:transparent;font-family:'Courier New',monospace}
+[data-theme="linux"] .demo-btn:hover{background:var(--accent);color:#000}
+[data-theme="linux"] .tag{border:1px solid var(--accent);background:transparent;font-family:'Courier New',monospace}
+[data-theme="linux"] .stat{border:1px solid var(--accent);background:transparent}
+[data-theme="linux"] .footer-links a{border:1px solid var(--accent);font-family:'Courier New',monospace}
+[data-theme="linux"] .footer-links a:hover{background:var(--accent);color:#000}
+[data-theme="linux"] .preview{border-radius:0;border:1px solid var(--accent)}
+[data-theme="linux"] .hero h1{font-family:'Courier New',monospace;letter-spacing:-4px}
+
+/* Noise overlay for texture */
+.noise{position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.5}
+
+/* Mouse glow */
+.mouse-glow{position:fixed;width:300px;height:300px;background:radial-gradient(circle,var(--glow),transparent 70%);border-radius:50%;pointer-events:none;z-index:1;opacity:.3;transform:translate(-50%,-50%);transition:opacity .3s}
+
+/* Linux scanlines */
+[data-theme="linux"] .noise{background-image:repeating-linear-gradient(0deg,rgba(0,255,65,.03) 0px,rgba(0,255,65,.03) 1px,transparent 1px,transparent 2px);opacity:1}
+
+/* Responsive */
+@media(max-width:768px){
+  .demo{grid-template-columns:1fr;gap:32px}
+  .demo:nth-child(even){direction:ltr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .side-nav,.themes,.cursor,.cursor-dot{display:none}
+  body{cursor:auto}
+  .section{padding:60px 20px}
+}
+
+/* Animations */
+.reveal{opacity:0;transform:translateY(40px);transition:all 1s cubic-bezier(.16,1,.3,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:all 1s cubic-bezier(.16,1,.3,1)}
+.reveal-left.active{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(50px);transition:all 1s cubic-bezier(.16,1,.3,1)}
+.reveal-right.active{opacity:1;transform:translateX(0)}
+
+/* Stagger delays */
+.demo-tags .tag:nth-child(1){transition-delay:.1s}
+.demo-tags .tag:nth-child(2){transition-delay:.2s}
+.demo-tags .tag:nth-child(3){transition-delay:.3s}
+.demo-tags .tag:nth-child(4){transition-delay:.4s}
+
+.stats .stat:nth-child(1){transition-delay:.1s}
+.stats .stat:nth-child(2){transition-delay:.2s}
+.stats .stat:nth-child(3){transition-delay:.3s}
+.stats .stat:nth-child(4){transition-delay:.4s}
+
+/* Hover glow effect for buttons */
+.demo-btn::before{content:'';position:absolute;inset:-2px;border-radius:inherit;background:linear-gradient(135deg,var(--accent),var(--accent2));z-index:-1;opacity:0;transition:opacity .3s;filter:blur(10px)}
+.demo-btn:hover::before{opacity:.5}
+.demo-btn{position:relative;z-index:1}
+
+/* Theme transition */
+body *{transition:background-color .3s,color .3s,border-color .3s}
+
+/* Loading screen */
+.loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000;transition:opacity .5s,visibility .5s}
+.loading.hidden{opacity:0;visibility:hidden}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body data-theme="apple">
+
+<div class="loading" id="loading">
+  <div class="loading-spinner"></div>
+</div>
+
+<div class="noise"></div>
+<div class="mouse-glow" id="mouseGlow"></div>
+<canvas id="canvas"></canvas>
+
+<div class="progress" id="progress"></div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<div class="themes">
+  <button class="active" data-theme="apple"></button>
+  <button data-theme="microsoft"></button>
+  <button data-theme="material"></button>
+  <button data-theme="linux"></button>
+</div>
+
+<nav class="side-nav" id="sideNav">
+  <a href="#hero" data-label="Home" class="active"></a>
+  <a href="#demo1" data-label="Apple Scroll Story"></a>
+  <a href="#demo2" data-label="Aurora Particle Lab"></a>
+  <a href="#demo3" data-label="Cinematic Showcase"></a>
+  <a href="#demo4" data-label="Particle Reshape"></a>
+  <a href="#footer" data-label="More"></a>
+</nav>
+
+<div class="scroll-top" id="scrollTop">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M12 19V5M5 12l7-7 7 7"/>
+  </svg>
+</div>
+
+<!-- Hero -->
+<section class="section hero" id="hero">
+  <h1>W0NDERFUL<br>DEMOS</h1>
+  <p>Interactive Visual Experiments</p>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- Demo 1 -->
+<section class="section" id="demo1">
+  <div class="demo">
+    <div class="demo-info reveal-left">
+      <span class="demo-num">01 / 04</span>
+      <h2 class="demo-title">Apple Scroll Story</h2>
+      <p class="demo-desc">A cinematic scrolling narrative inspired by Apple's product pages. Features chapter-based navigation, smooth parallax effects, and a built-in theme switcher.</p>
+      <div class="demo-tags">
+        <span class="tag">ScrollTrigger</span>
+        <span class="tag">Parallax</span>
+        <span class="tag">Theme System</span>
+        <span class="tag">15 Chapters</span>
+      </div>
+      <a href="./demos/apple-scroll-story/index.html" class="demo-btn">
+        View Demo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="preview reveal-right">
+      <div class="preview-glow tl"></div>
+      <div class="preview-glow br"></div>
+      <div class="preview-inner">🍎</div>
+    </div>
+  </div>
+</section>
+
+<!-- Demo 2 -->
+<section class="section" id="demo2">
+  <div class="demo">
+    <div class="preview reveal-left">
+      <div class="preview-glow tl"></div>
+      <div class="preview-glow br"></div>
+      <div class="preview-inner">🌌</div>
+    </div>
+    <div class="demo-info reveal-right">
+      <span class="demo-num">02 / 04</span>
+      <h2 class="demo-title">Aurora Particle Lab</h2>
+      <p class="demo-desc">WebGL-powered particle system with real-time controls. Features multiple presets including Aurora, Signal, Void, Solar, and Deep themes.</p>
+      <div class="demo-tags">
+        <span class="tag">WebGL</span>
+        <span class="tag">Particles</span>
+        <span class="tag">5 Presets</span>
+        <span class="tag">Real-time Controls</span>
+      </div>
+      <a href="./demos/aurora-particle-lab/index.html" class="demo-btn">
+        View Demo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Demo 3 -->
+<section class="section" id="demo3">
+  <div class="demo">
+    <div class="demo-info reveal-left">
+      <span class="demo-num">03 / 04</span>
+      <h2 class="demo-title">Cinematic Showcase</h2>
+      <p class="demo-desc">An immersive cosmic journey through the solar system and beyond. Features animated starfield, chapter navigation, and cursor glow effects.</p>
+      <div class="demo-tags">
+        <span class="tag">Canvas</span>
+        <span class="tag">Starfield</span>
+        <span class="tag">12 Chapters</span>
+        <span class="tag">Cursor Effects</span>
+      </div>
+      <a href="./demos/cinematic-showcase/index.html" class="demo-btn">
+        View Demo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="preview reveal-right">
+      <div class="preview-glow tl"></div>
+      <div class="preview-glow br"></div>
+      <div class="preview-inner">🚀</div>
+    </div>
+  </div>
+</section>
+
+<!-- Demo 4 -->
+<section class="section" id="demo4">
+  <div class="demo">
+    <div class="preview reveal-left">
+      <div class="preview-glow tl"></div>
+      <div class="preview-glow br"></div>
+      <div class="preview-inner">✨</div>
+    </div>
+    <div class="demo-info reveal-right">
+      <span class="demo-num">04 / 04</span>
+      <h2 class="demo-title">Particle Reshape</h2>
+      <p class="demo-desc">Three.js particle system with morphing capabilities. Transform between 7 different particle shapes with interactive mouse controls.</p>
+      <div class="demo-tags">
+        <span class="tag">Three.js</span>
+        <span class="tag">7 Shapes</span>
+        <span class="tag">Morphing</span>
+        <span class="tag">Mouse Interaction</span>
+      </div>
+      <a href="./demos/particle-reshape/index.html" class="demo-btn">
+        View Demo
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="section">
+  <div class="glow-line" style="top:0"></div>
+  <div class="stats" style="max-width:800px;width:100%">
+    <div class="stat reveal"><div class="stat-num">4</div><div class="stat-label">Demos</div></div>
+    <div class="stat reveal"><div class="stat-num">3</div><div class="stat-label">Libraries</div></div>
+    <div class="stat reveal"><div class="stat-num">4</div><div class="stat-label">Themes</div></div>
+    <div class="stat reveal"><div class="stat-num">∞</div><div class="stat-label">Possibilities</div></div>
+  </div>
+  <div class="glow-line" style="bottom:0"></div>
+</section>
+
+<!-- Footer -->
+<section class="section footer" id="footer">
+  <h2 class="reveal">Explore More</h2>
+  <p class="reveal">More demos coming soon...</p>
+  <div class="footer-links reveal">
+    <a href="https://github.com/w0nderful666/w0nderful-demos" target="_blank">GitHub</a>
+    <a href="https://github.com/w0nderful666" target="_blank">Profile</a>
+  </div>
+  <p class="reveal" style="font-size:12px;color:var(--text2);margin-top:48px">© 2026 W0NDERFUL. Built with Three.js & GSAP</p>
+</section>
+
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+// ============================================
+// Three.js Background
+// ============================================
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.z = 5;
+
+// Stars
+const starsGeo = new THREE.BufferGeometry();
+const count = 2000;
+const pos = new Float32Array(count*3);
+const cols = new Float32Array(count*3);
+
+for(let i=0;i<count;i++){
+  pos[i*3] = (Math.random()-.5)*50;
+  pos[i*3+1] = (Math.random()-.5)*50;
+  pos[i*3+2] = (Math.random()-.5)*50;
+  cols[i*3] = .2+Math.random()*.3;
+  cols[i*3+1] = .4+Math.random()*.4;
+  cols[i*3+2] = .8+Math.random()*.2;
+}
+
+starsGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+starsGeo.setAttribute('color',new THREE.BufferAttribute(cols,3));
+
+const starsMat = new THREE.PointsMaterial({
+  size:.08,
+  vertexColors:true,
+  transparent:true,
+  opacity:.8,
+  blending:THREE.AdditiveBlending,
+  depthWrite:false,
+  sizeAttenuation:true
+});
+
+const stars = new THREE.Points(starsGeo,starsMat);
+scene.add(stars);
+
+// Floating particles
+const partGeo = new THREE.BufferGeometry();
+const partCount = 300;
+const partPos = new Float32Array(partCount*3);
+const partVel = [];
+
+for(let i=0;i<partCount;i++){
+  partPos[i*3] = (Math.random()-.5)*20;
+  partPos[i*3+1] = (Math.random()-.5)*20;
+  partPos[i*3+2] = (Math.random()-.5)*20;
+  partVel.push({x:(Math.random()-.5)*.02,y:(Math.random()-.5)*.02,z:(Math.random()-.5)*.02});
+}
+
+partGeo.setAttribute('position',new THREE.BufferAttribute(partPos,3));
+
+const partMat = new THREE.PointsMaterial({
+  size:.04,
+  color:0x0071e3,
+  transparent:true,
+  opacity:.6,
+  blending:THREE.AdditiveBlending,
+  sizeAttenuation:true
+});
+
+const particles = new THREE.Points(partGeo,partMat);
+scene.add(particles);
+
+// Glowing lines
+const linesCount = 20;
+const lines = [];
+
+for(let i=0;i<linesCount;i++){
+  const lineGeo = new THREE.BufferGeometry();
+  const linePos = new Float32Array(6);
+
+  linePos[0] = (Math.random()-.5)*30;
+  linePos[1] = (Math.random()-.5)*30;
+  linePos[2] = (Math.random()-.5)*30;
+  linePos[3] = linePos[0]+(Math.random()-.5)*5;
+  linePos[4] = linePos[1]+(Math.random()-.5)*5;
+  linePos[5] = linePos[2]+(Math.random()-.5)*5;
+
+  lineGeo.setAttribute('position',new THREE.BufferAttribute(linePos,3));
+
+  const lineMat = new THREE.LineBasicMaterial({
+    color:0x0071e3,
+    transparent:true,
+    opacity:.15,
+    blending:THREE.AdditiveBlending
+  });
+
+  const line = new THREE.Line(lineGeo,lineMat);
+  line.userData = {
+    speed:.001+Math.random()*.002,
+    rotX:(Math.random()-.5)*.01,
+    rotY:(Math.random()-.5)*.01,
+    origColor:0x0071e3
+  };
+
+  scene.add(line);
+  lines.push(line);
+}
+
+// Glowing orbs
+const orbGeo = new THREE.SphereGeometry(.5,32,32);
+const orbMat = new THREE.MeshBasicMaterial({
+  color:0x0071e3,
+  transparent:true,
+  opacity:.1,
+  blending:THREE.AdditiveBlending
+});
+
+const orb1 = new THREE.Mesh(orbGeo,orbMat);
+orb1.position.set(-5,3,-10);
+scene.add(orb1);
+
+const orb2 = new THREE.Mesh(orbGeo,orbMat.clone());
+orb2.material.color.setHex(0x2997ff);
+orb2.position.set(5,-3,-10);
+scene.add(orb2);
+
+// Mouse
+const mouse = {x:0,y:0};
+const mouseTarget = {x:0,y:0};
+
+document.addEventListener('mousemove',e=>{
+  mouse.x = (e.clientX/window.innerWidth)*2-1;
+  mouse.y = -(e.clientY/window.innerHeight)*2+1;
+});
+
+// Animation
+const clock = new THREE.Clock();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  mouseTarget.x += (mouse.x-mouseTarget.x)*.05;
+  mouseTarget.y += (mouse.y-mouseTarget.y)*.05;
+
+  camera.position.x = mouseTarget.x*.3;
+  camera.position.y = mouseTarget.y*.3;
+  camera.lookAt(0,0,0);
+
+  stars.rotation.y = t*.02;
+  stars.rotation.x = t*.01;
+
+  // Pulse stars on scroll
+  const scrollY = window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const scrollProgress = scrollY/maxScroll;
+  starsMat.opacity = .6+Math.sin(scrollProgress*Math.PI*4)*.2;
+
+  const p = partGeo.attributes.position.array;
+  for(let i=0;i<partCount;i++){
+    p[i*3] += partVel[i].x;
+    p[i*3+1] += partVel[i].y;
+    p[i*3+2] += partVel[i].z;
+    if(Math.abs(p[i*3])>10) partVel[i].x *= -1;
+    if(Math.abs(p[i*3+1])>10) partVel[i].y *= -1;
+    if(Math.abs(p[i*3+2])>10) partVel[i].z *= -1;
+  }
+  partGeo.attributes.position.needsUpdate = true;
+
+  // Animate lines
+  lines.forEach(line=>{
+    line.rotation.x += line.userData.rotX;
+    line.rotation.y += line.userData.rotY;
+  });
+
+  // Animate orbs
+  orb1.position.x = Math.sin(t*.5)*5;
+  orb1.position.y = Math.cos(t*.3)*3;
+  orb2.position.x = Math.cos(t*.4)*5;
+  orb2.position.y = Math.sin(t*.6)*3;
+
+  renderer.render(scene,camera);
+}
+
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+// ============================================
+// Scroll Animations
+// ============================================
+const reveals = document.querySelectorAll('.reveal,.reveal-left,.reveal-right');
+
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('active');
+    }
+  });
+},{threshold:.1,rootMargin:'0px 0px -50px 0px'});
+
+reveals.forEach(el=>observer.observe(el));
+
+// Side Nav
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.side-nav a');
+
+const navObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = entry.target.id;
+      navLinks.forEach(link=>{
+        link.classList.toggle('active',link.getAttribute('href')===`#${id}`);
+      });
+    }
+  });
+},{threshold:.3});
+
+sections.forEach(s=>navObserver.observe(s));
+
+// ============================================
+// Theme Switcher
+// ============================================
+const themeBtns = document.querySelectorAll('.themes button');
+const body = document.body;
+
+themeBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const theme = btn.dataset.theme;
+    body.dataset.theme = theme;
+    themeBtns.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const colors = {
+      apple:{p:0x0071e3},
+      microsoft:{p:0x0078d4},
+      material:{p:0x1976d2},
+      linux:{p:0x00ff41}
+    };
+    partMat.color.setHex(colors[theme].p);
+    orb1.material.color.setHex(colors[theme].p);
+    orb2.material.color.setHex(colors[theme].p);
+    lines.forEach(line=>{
+      line.material.color.setHex(colors[theme].p);
+      line.userData.origColor = colors[theme].p;
+    });
+  });
+});
+
+// ============================================
+// Custom Cursor
+// ============================================
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+
+document.addEventListener('mousemove',e=>{
+  cursor.style.left = e.clientX-12+'px';
+  cursor.style.top = e.clientY-12+'px';
+  cursorDot.style.left = e.clientX-3+'px';
+  cursorDot.style.top = e.clientY-3+'px';
+});
+
+document.querySelectorAll('a,button,.preview').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='scale(1.5)';cursor.style.opacity='.5'});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';cursor.style.opacity='1'});
+});
+
+// ============================================
+// Click Effect
+// ============================================
+document.addEventListener('click',e=>{
+  for(let i=0;i<8;i++){
+    const spark = document.createElement('div');
+    spark.style.cssText=`
+      position:fixed;
+      left:${e.clientX}px;
+      top:${e.clientY}px;
+      width:4px;
+      height:4px;
+      background:var(--accent);
+      border-radius:50%;
+      pointer-events:none;
+      z-index:9999;
+    `;
+    document.body.appendChild(spark);
+
+    const angle = (Math.PI*2/8)*i;
+    const distance = 50+Math.random()*30;
+    const tx = Math.cos(angle)*distance;
+    const ty = Math.sin(angle)*distance;
+
+    spark.animate([
+      {transform:'translate(0,0) scale(1)',opacity:1},
+      {transform:`translate(${tx}px,${ty}px) scale(0)`,opacity:0}
+    ],{duration:600,easing:'cubic-bezier(0,0.9,0.57,1)'}).onfinish=()=>spark.remove();
+  }
+});
+
+// ============================================
+// Preview Card Tilt
+// ============================================
+document.querySelectorAll('.preview').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX-rect.left)/rect.width;
+    const y = (e.clientY-rect.top)/rect.height;
+    card.style.transform = `perspective(1000px) rotateY(${(x-.5)*8}deg) rotateX(${(y-.5)*-8}deg) translateY(-4px)`;
+  });
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform = 'perspective(1000px) rotateY(0) rotateX(0) translateY(0)';
+  });
+});
+
+// ============================================
+// Progress Bar
+// ============================================
+const progress = document.getElementById('progress');
+
+// ============================================
+// Scroll Top Button
+// ============================================
+const scrollTopBtn = document.getElementById('scrollTop');
+
+scrollTopBtn.addEventListener('click',()=>{
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// ============================================
+// Keyboard Nav
+// ============================================
+document.addEventListener('keydown',e=>{
+  if(e.key>='1'&&e.key<='4'){
+    themeBtns[e.key-1]?.click();
+  }
+  if(e.key==='ArrowDown'||e.key===' '){
+    e.preventDefault();
+    const current = document.querySelector('.side-nav a.active');
+    const next = current?.nextElementSibling;
+    if(next) next.click();
+  }
+  if(e.key==='ArrowUp'){
+    e.preventDefault();
+    const current = document.querySelector('.side-nav a.active');
+    const prev = current?.previousElementSibling;
+    if(prev) prev.click();
+  }
+});
+
+// ============================================
+// Page Load Animation
+// ============================================
+window.addEventListener('load',()=>{
+  const loading = document.getElementById('loading');
+
+  setTimeout(()=>{
+    loading.classList.add('hidden');
+
+    // Animate hero elements
+    setTimeout(()=>{
+      document.querySelector('.hero h1').classList.add('active');
+    },300);
+    setTimeout(()=>{
+      document.querySelector('.hero p').classList.add('active');
+    },500);
+    setTimeout(()=>{
+      document.querySelector('.hero .scroll-hint').classList.add('active');
+    },700);
+  },500);
+});
+
+// ============================================
+// Smooth Scroll for Nav Links
+// ============================================
+document.querySelectorAll('.side-nav a').forEach(link=>{
+  link.addEventListener('click',e=>{
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if(target) target.scrollIntoView({behavior:'smooth'});
+  });
+});
+
+// ============================================
+// Performance: Throttle scroll events
+// ============================================
+function throttle(func,limit){
+  let inThrottle;
+  return function(...args){
+    if(!inThrottle){
+      func.apply(this,args);
+      inThrottle=true;
+      setTimeout(()=>inThrottle=false,limit);
+    }
+  }
+}
+
+// Apply throttling to scroll-heavy functions
+const throttledScroll = throttle(()=>{
+  // Progress bar
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrollPercent = (scrollTop/docHeight)*100;
+  progress.style.width = scrollPercent+'%';
+
+  // Scroll top button
+  if(scrollTop>500){
+    scrollTopBtn.classList.add('visible');
+  } else {
+    scrollTopBtn.classList.remove('visible');
+  }
+},16);
+
+window.addEventListener('scroll',throttledScroll);
+
+// ============================================
+// Parallax on Mouse Move
+// ============================================
+const heroTitle = document.querySelector('.hero h1');
+const heroSub = document.querySelector('.hero p');
+const mouseGlow = document.getElementById('mouseGlow');
+
+document.addEventListener('mousemove',e=>{
+  const x = (e.clientX/window.innerWidth-.5)*2;
+  const y = (e.clientY/window.innerHeight-.5)*2;
+
+  if(heroTitle){
+    heroTitle.style.transform = `translate(${x*10}px,${y*10}px)`;
+  }
+  if(heroSub){
+    heroSub.style.transform = `translate(${x*5}px,${y*5}px)`;
+  }
+
+  // Mouse glow
+  if(mouseGlow){
+    mouseGlow.style.left = e.clientX+'px';
+    mouseGlow.style.top = e.clientY+'px';
+  }
+});
+</script>
+
+</body>
+</html>
