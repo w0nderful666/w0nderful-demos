@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漫旅 · Wanderlust</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink: #1a1a1a;
+  --paper: #faf8f5;
+  --accent: #c04a1a;
+  --accent-light: #e8a87c;
+  --muted: #8a8a8a;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ===== Navigation ===== */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 20px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.4s;
+}
+
+nav.scrolled {
+  background: rgba(250, 248, 245, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 12px 48px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+}
+
+.nav-logo {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+nav.scrolled .nav-logo { color: var(--ink); }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.nav-links a:hover { opacity: 1; }
+
+/* ===== Hero ===== */
+.hero {
+  height: 100vh;
+  min-height: 700px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 80px 48px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&q=80') center/cover;
+  transform: scale(1.05);
+  transition: transform 8s ease-out;
+}
+
+.hero.loaded .hero-bg { transform: scale(1); }
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(26,26,26,0.7) 0%,
+    rgba(26,26,26,0.2) 40%,
+    rgba(26,26,26,0.05) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  max-width: 680px;
+}
+
+.hero-tag {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--accent-light);
+}
+
+.hero-desc {
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.7;
+  opacity: 0.85;
+  max-width: 500px;
+  margin-bottom: 36px;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 32px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: all 0.3s;
+}
+
+.hero-cta:hover {
+  background: #a83d15;
+  transform: translateY(-2px);
+}
+
+.hero-cta svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s;
+}
+
+.hero-cta:hover svg { transform: translateX(4px); }
+
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  opacity: 0.6;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, #fff, transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+/* ===== Section Common ===== */
+.section {
+  padding: 120px 48px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+.section-desc {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+/* ===== Destinations ===== */
+.destinations {
+  background: #fff;
+}
+
+.dest-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.dest-card {
+  position: relative;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  cursor: pointer;
+  group: true;
+}
+
+.dest-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dest-card:hover img { transform: scale(1.08); }
+
+.dest-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px;
+  transition: background 0.4s;
+}
+
+.dest-card:hover .dest-card-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%);
+}
+
+.dest-card-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.dest-card-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+}
+
+.dest-card-arrow {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.4s;
+}
+
+.dest-card:hover .dest-card-arrow {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dest-card-arrow svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+/* ===== Experiences ===== */
+.experiences {
+  background: var(--paper);
+}
+
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 48px;
+  margin-top: 48px;
+}
+
+.exp-card {
+  display: flex;
+  gap: 24px;
+  padding: 32px;
+  background: #fff;
+  transition: all 0.4s;
+}
+
+.exp-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+}
+
+.exp-card-num {
+  font-family: var(--serif);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.3;
+}
+
+.exp-card-content { flex: 1; }
+
+.exp-card-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.exp-card-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ===== Quote ===== */
+.quote-section {
+  background: var(--ink);
+  color: #fff;
+  text-align: center;
+  padding: 120px 48px;
+}
+
+.quote-mark {
+  font-family: var(--serif);
+  font-size: 80px;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: -20px;
+}
+
+.quote-text {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.5;
+  max-width: 700px;
+  margin: 0 auto 24px;
+}
+
+.quote-author {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* ===== Gallery ===== */
+.gallery {
+  background: #fff;
+  padding: 120px 0;
+}
+
+.gallery-header {
+  padding: 0 48px;
+  margin-bottom: 48px;
+}
+
+.gallery-track {
+  display: flex;
+  gap: 16px;
+  animation: galleryScroll 30s linear infinite;
+}
+
+.gallery-track:hover { animation-play-state: paused; }
+
+@keyframes galleryScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.gallery-item {
+  flex-shrink: 0;
+  width: 360px;
+  height: 480px;
+  overflow: hidden;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s;
+}
+
+.gallery-item:hover img { transform: scale(1.05); }
+
+/* ===== CTA ===== */
+.cta-section {
+  background: var(--paper);
+  text-align: center;
+  padding: 120px 48px;
+}
+
+.cta-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.cta-desc {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 480px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 40px;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  transition: all 0.3s;
+}
+
+.cta-btn:hover {
+  background: #333;
+  transform: translateY(-2px);
+}
+
+/* ===== Footer ===== */
+footer {
+  background: var(--ink);
+  color: #fff;
+  padding: 60px 48px 40px;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 32px;
+}
+
+.footer-brand {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.footer-sub {
+  font-size: 13px;
+  opacity: 0.5;
+  max-width: 300px;
+  line-height: 1.6;
+}
+
+.footer-links {
+  display: flex;
+  gap: 48px;
+}
+
+.footer-col h4 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 14px;
+  color: #fff;
+  text-decoration: none;
+  opacity: 0.8;
+  margin-bottom: 10px;
+  transition: opacity 0.3s;
+}
+
+.footer-col a:hover { opacity: 1; }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  opacity: 0.4;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  nav { padding: 16px 24px; }
+  .nav-links { display: none; }
+  .hero { padding: 60px 24px; }
+  .section { padding: 80px 24px; }
+  .dest-grid { grid-template-columns: 1fr; }
+  .exp-grid { grid-template-columns: 1fr; gap: 24px; }
+  .gallery-item { width: 280px; height: 360px; }
+  .footer-top { flex-direction: column; gap: 32px; }
+  .footer-links { gap: 32px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav id="nav">
+  <a href="#" class="nav-logo">漫旅 Wanderlust</a>
+  <ul class="nav-links">
+    <li><a href="#destinations">目的地</a></li>
+    <li><a href="#experiences">体验</a></li>
+    <li><a href="#gallery">画廊</a></li>
+    <li><a href="#contact">联系</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-tag">2026 春季精选</div>
+    <h1 class="hero-title">去世界的<em>尽头</em>，找回内心的<em>起点</em></h1>
+    <p class="hero-desc">每一次出发，都是一次与自我的对话。穿越山海，遇见未知的风景，也遇见更好的自己。</p>
+    <a href="#destinations" class="hero-cta">
+      探索目的地
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  <div class="hero-scroll">
+    <span>向下滚动</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- Destinations -->
+<section class="section destinations" id="destinations">
+  <div class="section-label">精选目的地</div>
+  <h2 class="section-title">世界在等你出发</h2>
+  <p class="section-desc">从冰川到沙漠，从古城到都市，每一个目的地都有属于它的故事。</p>
+
+  <div class="dest-grid">
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=600&q=80" alt="瑞士阿尔卑斯">
+      <div class="dest-card-overlay">
+        <div class="dest-card-title">瑞士</div>
+        <div class="dest-card-sub">阿尔卑斯山脉的云端漫步</div>
+      </div>
+      <div class="dest-card-arrow">
+        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </div>
+
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1528164344705-47542687000d?w=600&q=80" alt="冰岛极光">
+      <div class="dest-card-overlay">
+        <div class="dest-card-title">冰岛</div>
+        <div class="dest-card-sub">极光下的冰与火之歌</div>
+      </div>
+      <div class="dest-card-arrow">
+        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </div>
+
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?w=600&q=80" alt="日本京都">
+      <div class="dest-card-overlay">
+        <div class="dest-card-title">京都</div>
+        <div class="dest-card-sub">千年古都的禅意时光</div>
+      </div>
+      <div class="dest-card-arrow">
+        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Experiences -->
+<section class="section experiences" id="experiences">
+  <div class="section-label">旅行体验</div>
+  <h2 class="section-title">不只是看风景</h2>
+  <p class="section-desc">真正的旅行，是用所有感官去感受一个地方。</p>
+
+  <div class="exp-grid">
+    <div class="exp-card">
+      <div class="exp-card-num">01</div>
+      <div class="exp-card-content">
+        <h3 class="exp-card-title">在地烹饪</h3>
+        <p class="exp-card-desc">跟着当地厨师逛市场、选食材、学做一道地道的菜肴。味蕾的记忆，比照片更持久。</p>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-card-num">02</div>
+      <div class="exp-card-content">
+        <h3 class="exp-card-title">手作工坊</h3>
+        <p class="exp-card-desc">陶艺、织布、造纸......用双手触碰一门古老技艺，带走一件独一无二的纪念。</p>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-card-num">03</div>
+      <div class="exp-card-content">
+        <h3 class="exp-card-title">星空露营</h3>
+        <p class="exp-card-desc">远离城市光污染，在无人的旷野搭起帐篷，抬头便是银河。</p>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-card-num">04</div>
+      <div class="exp-card-content">
+        <h3 class="exp-card-title">文化深潜</h3>
+        <p class="exp-card-desc">不只是打卡景点，而是走进当地人的生活，听他们的故事，理解他们的世界。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quote -->
+<section class="quote-section">
+  <div class="quote-mark">"</div>
+  <blockquote class="quote-text">旅行的意义不在于到达远方，而在于途中发现了一个全新的自己。</blockquote>
+  <div class="quote-author">— 马塞尔 · 普鲁斯特</div>
+</section>
+
+<!-- Gallery -->
+<section class="gallery" id="gallery">
+  <div class="gallery-header">
+    <div class="section-label">旅途瞬间</div>
+    <h2 class="section-title">用镜头记录世界</h2>
+  </div>
+
+  <div class="gallery-track">
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80" alt="公路旅行"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80" alt="湖光山色"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80" alt="海上日落"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&q=80" alt="帐篷露营"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=600&q=80" alt="古城街巷"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" alt="热带海滩"></div>
+    <!-- Duplicate for infinite scroll -->
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&q=80" alt="公路旅行"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80" alt="湖光山色"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80" alt="海上日落"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&q=80" alt="帐篷露营"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=600&q=80" alt="古城街巷"></div>
+    <div class="gallery-item"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" alt="热带海滩"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <h2 class="cta-title">下一站，<br>你想去哪里？</h2>
+  <p class="cta-desc">告诉我们你的旅行梦想，我们为你定制专属的旅程。</p>
+  <a href="#" class="cta-btn">
+    开始规划
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">漫旅 Wanderlust</div>
+      <p class="footer-sub">用脚步丈量世界，用心灵感受生活。</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>探索</h4>
+        <a href="#">目的地</a>
+        <a href="#">旅行体验</a>
+        <a href="#">定制行程</a>
+      </div>
+      <div class="footer-col">
+        <h4>关于</h4>
+        <a href="#">我们的故事</a>
+        <a href="#">旅行达人</a>
+        <a href="#">合作伙伴</a>
+      </div>
+      <div class="footer-col">
+        <h4>联系</h4>
+        <a href="#">hello@wanderlust.com</a>
+        <a href="#">+86 400-888-8888</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 漫旅 Wanderlust. All rights reserved.</span>
+    <span>Designed with Huashu-Design</span>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Hero loaded animation
+window.addEventListener('load', () => {
+  document.getElementById('hero').classList.add('loaded');
+});
+
+// Intersection Observer for fade-in
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.dest-card, .exp-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>
