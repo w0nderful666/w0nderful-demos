@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Anime Edition</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{overflow-x:hidden}
+body{background:#0a0a1a;color:#fff;font-family:'Inter',sans-serif,system-ui;overflow-x:hidden}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
+.scroll-spacer{position:relative;z-index:2;pointer-events:none}
+.scene{height:300vh;position:relative}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.overlay h1{font-size:clamp(48px,10vw,120px);font-weight:900;letter-spacing:-0.03em;opacity:0;transform:translateY(40px);text-shadow:0 0 60px rgba(0,150,255,0.3)}
+.overlay h2{font-size:clamp(24px,4vw,48px);font-weight:300;opacity:0;transform:translateY(30px);color:rgba(255,255,255,0.7)}
+.overlay p{font-size:16px;opacity:0;color:rgba(255,255,255,0.5);margin-top:12px}
+.overlay-center{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;pointer-events:none;text-align:center}
+.scene-label{position:fixed;top:40px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.3);opacity:0}
+.progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#ff6b9d,#c44dff,#00b4ff);z-index:100;width:0%}
+.loading{position:fixed;inset:0;z-index:999;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s}
+.loading.done{opacity:0;pointer-events:none}
+.loading-text{font-size:14px;letter-spacing:6px;text-transform:uppercase;color:rgba(255,255,255,0.4)}
+.loading-bar{width:200px;height:2px;background:rgba(255,255,255,0.1);margin-top:20px;border-radius:1px;overflow:hidden}
+.loading-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#ff6b9d,#c44dff);transition:width 0.3s}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="loading-text">NEXUS</div>
+  <div class="loading-bar"><div class="loading-bar-fill" id="loadFill"></div></div>
+</div>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="scene-label" id="sceneLabel"></div>
+
+<div class="overlay-center" id="titleOverlay">
+  <h1 id="mainTitle">NEXUS</h1>
+  <h2 id="subTitle">Where Code Meets Craft</h2>
+  <p id="scrollHint">Scroll to begin</p>
+</div>
+
+<div class="scroll-spacer">
+  <div class="scene" id="scene1"></div>
+  <div class="scene" id="scene2"></div>
+  <div class="scene" id="scene3"></div>
+  <div class="scene" id="scene4"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* =========================================================
+   RENDERER + SCENE + CAMERA
+   ========================================================= */
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+camera.position.set(0, 5, 30);
+
+/* Post-processing */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.4, 0.5, 0.85);
+composer.addPass(bloomPass);
+
+/* =========================================================
+   ANIME MATERIAL HELPERS
+   ========================================================= */
+function makeToonGradient(colors) {
+  const s = colors.length;
+  const data = new Uint8Array(s * 4);
+  for (let i = 0; i < s; i++) {
+    const c = new THREE.Color(colors[i]);
+    data[i * 4] = Math.floor(c.r * 255);
+    data[i * 4 + 1] = Math.floor(c.g * 255);
+    data[i * 4 + 2] = Math.floor(c.b * 255);
+    data[i * 4 + 3] = 255;
+  }
+  const tex = new THREE.DataTexture(data, s, 1, THREE.RGBAFormat);
+  tex.needsUpdate = true;
+  tex.minFilter = THREE.NearestFilter;
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
+}
+
+const grad3 = makeToonGradient(['#1a1a3a', '#3a3a6a', '#8888cc']);
+const grad4 = makeToonGradient(['#0a1a2a', '#1a3a5a', '#4a8acc', '#99ccff']);
+const gradWarm = makeToonGradient(['#2a1a0a', '#5a3a1a', '#cc8844', '#ffcc88']);
+const gradNeon = makeToonGradient(['#0a0a2a', '#1a0a4a', '#6a2aaa', '#cc66ff']);
+
+function toonMat(color, gradient = grad3) {
+  return new THREE.MeshToonMaterial({ color: new THREE.Color(color), gradientMap: gradient });
+}
+
+function glowMat(color, intensity = 2) {
+  return new THREE.MeshBasicMaterial({ color: new THREE.Color(color), toneMapped: false });
+}
+
+/* Edge/outline helper — slightly larger dark shell */
+function addOutline(mesh, thickness = 0.03) {
+  const geo = mesh.geometry.clone();
+  const mat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+  const shell = new THREE.Mesh(geo, mat);
+  shell.scale.multiplyScalar(1 + thickness);
+  mesh.add(shell);
+}
+
+/* =========================================================
+   SKY GRADIENT
+   ========================================================= */
+function makeSky(topColor, bottomColor) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 2; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, topColor);
+  g.addColorStop(1, bottomColor);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 2, 256);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  return tex;
+}
+
+/* =========================================================
+   SCENE 1: CITY SKYLINE
+   ========================================================= */
+const cityGroup = new THREE.Group();
+scene.add(cityGroup);
+
+/* Ground plane */
+const groundGeo = new THREE.PlaneGeometry(200, 200);
+const groundMat = toonMat('#1a1a2e', grad3);
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -2;
+cityGroup.add(ground);
+
+/* Buildings */
+const buildingColors = ['#2a2a4a', '#1e1e3a', '#33335a', '#252548', '#2a2a50'];
+for (let i = 0; i < 80; i++) {
+  const w = 0.5 + Math.random() * 2;
+  const h = 1 + Math.random() * 8;
+  const d = 0.5 + Math.random() * 2;
+  const geo = new THREE.BoxGeometry(w, h, d);
+  const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
+  const mat = toonMat(color, grad3);
+  const mesh = new THREE.Mesh(geo, mat);
+  const angle = (i / 80) * Math.PI * 2;
+  const radius = 15 + Math.random() * 40;
+  mesh.position.set(Math.cos(angle) * radius, h / 2 - 2, Math.sin(angle) * radius);
+  addOutline(mesh, 0.02);
+  cityGroup.add(mesh);
+
+  /* Window glow */
+  if (h > 3 && Math.random() > 0.4) {
+    const winGeo = new THREE.PlaneGeometry(w * 0.6, h * 0.4);
+    const winColor = Math.random() > 0.5 ? '#ffcc44' : '#44aaff';
+    const winMat = glowMat(winColor, 1.5);
+    const win = new THREE.Mesh(winGeo, winMat);
+    win.position.copy(mesh.position);
+    win.position.z += d / 2 + 0.01;
+    win.position.y += h * 0.1;
+    cityGroup.add(win);
+  }
+}
+
+/* Sun / Moon */
+const sunGeo = new THREE.SphereGeometry(4, 32, 32);
+const sunMat = glowMat('#ff8844', 3);
+const sun = new THREE.Mesh(sunGeo, sunMat);
+sun.position.set(0, 12, -60);
+cityGroup.add(sun);
+
+/* Sun glow ring */
+const ringGeo = new THREE.RingGeometry(5, 12, 64);
+const ringMat = new THREE.MeshBasicMaterial({ color: '#ff6622', transparent: true, opacity: 0.15, side: THREE.DoubleSide });
+const ring = new THREE.Mesh(ringGeo, ringMat);
+ring.position.copy(sun.position);
+ring.position.z += 0.1;
+cityGroup.add(ring);
+
+/* Anime speed lines (vertical streaks) */
+const linesGroup = new THREE.Group();
+for (let i = 0; i < 40; i++) {
+  const lineGeo = new THREE.PlaneGeometry(0.02, 2 + Math.random() * 4);
+  const lineMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.06 + Math.random() * 0.08, side: THREE.DoubleSide });
+  const line = new THREE.Mesh(lineGeo, lineMat);
+  line.position.set((Math.random() - 0.5) * 40, Math.random() * 20 - 5, (Math.random() - 0.5) * 30 - 10);
+  linesGroup.add(line);
+}
+cityGroup.add(linesGroup);
+
+/* =========================================================
+   SCENE 2: PORTFOLIO FLOATING SCREENS
+   ========================================================= */
+const portfolioGroup = new THREE.Group();
+portfolioGroup.visible = false;
+scene.add(portfolioGroup);
+
+const projectData = [
+  { name: 'Aurora', color: '#6a44ff', desc: 'AI Design Tool' },
+  { name: 'Vortex', color: '#00cc88', desc: 'Data Visualization' },
+  { name: 'Echo',   color: '#ff6644', desc: 'Spatial Audio' },
+  { name: 'Nebula', color: '#4488ff', desc: 'Identity Platform' },
+  { name: 'Horizon',color: '#ff4488', desc: 'Fitness Tracker' },
+  { name: 'Vertex', color: '#88ff44', desc: 'API Gateway' }
+];
+
+const screens = [];
+projectData.forEach((p, i) => {
+  const angle = (i / projectData.length) * Math.PI * 2;
+  const radius = 8;
+
+  /* Screen frame */
+  const frameGeo = new THREE.BoxGeometry(3.2, 2.2, 0.08);
+  const frameMat = toonMat('#1a1a2e', grad4);
+  const frame = new THREE.Mesh(frameGeo, frameMat);
+  addOutline(frame, 0.015);
+
+  /* Screen face */
+  const screenGeo = new THREE.PlaneGeometry(2.8, 1.8);
+  const screenMat = new THREE.MeshBasicMaterial({ color: p.color, transparent: true, opacity: 0.85 });
+  const screenFace = new THREE.Mesh(screenGeo, screenMat);
+  screenFace.position.z = 0.05;
+
+  /* Glow behind screen */
+  const glowGeo = new THREE.PlaneGeometry(4, 3);
+  const glowMat2 = new THREE.MeshBasicMaterial({ color: p.color, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+  const glow = new THREE.Mesh(glowGeo, glowMat2);
+  glow.position.z = -0.2;
+
+  const group = new THREE.Group();
+  group.add(frame, screenFace, glow);
+  group.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+  group.lookAt(0, 0, 0);
+  group.userData = p;
+  portfolioGroup.add(group);
+  screens.push(group);
+});
+
+/* Floating particles around portfolio */
+const partGeo = new THREE.BufferGeometry();
+const partCount = 500;
+const partPos = new Float32Array(partCount * 3);
+for (let i = 0; i < partCount; i++) {
+  partPos[i * 3] = (Math.random() - 0.5) * 30;
+  partPos[i * 3 + 1] = (Math.random() - 0.5) * 20;
+  partPos[i * 3 + 2] = (Math.random() - 0.5) * 30;
+}
+partGeo.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+const partMat = new THREE.PointsMaterial({ size: 0.08, color: '#8888ff', transparent: true, opacity: 0.4 });
+const particles = new THREE.Points(partGeo, partMat);
+portfolioGroup.add(particles);
+
+/* =========================================================
+   SCENE 3: TEAM — ABSTRACT FIGURES
+   ========================================================= */
+const teamGroup = new THREE.Group();
+teamGroup.visible = false;
+scene.add(teamGroup);
+
+const teamColors = ['#ff6b9d', '#c44dff', '#00b4ff', '#44ff88', '#ffaa44', '#ff4466'];
+const figures = [];
+for (let i = 0; i < 6; i++) {
+  const x = (i - 2.5) * 5;
+  const figGroup = new THREE.Group();
+
+  /* Body — capsule shape */
+  const bodyGeo = new THREE.CapsuleGeometry(0.5, 1.5, 8, 16);
+  const bodyMat = toonMat(teamColors[i], gradNeon);
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = 1.2;
+  addOutline(body, 0.025);
+  figGroup.add(body);
+
+  /* Head */
+  const headGeo = new THREE.SphereGeometry(0.4, 16, 16);
+  const headMat = toonMat(teamColors[i], gradNeon);
+  const head = new THREE.Mesh(headGeo, headMat);
+  head.position.y = 2.7;
+  addOutline(head, 0.03);
+  figGroup.add(head);
+
+  /* Glow ring at base */
+  const baseGeo = new THREE.RingGeometry(0.8, 1.2, 32);
+  const baseMat = new THREE.MeshBasicMaterial({ color: teamColors[i], transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+  const base = new THREE.Mesh(baseGeo, baseMat);
+  base.rotation.x = -Math.PI / 2;
+  base.position.y = 0.05;
+  figGroup.add(base);
+
+  figGroup.position.set(x, -2, 0);
+  teamGroup.add(figGroup);
+  figures.push(figGroup);
+}
+
+/* Floor for team */
+const teamFloorGeo = new THREE.PlaneGeometry(80, 40);
+const teamFloorMat = toonMat('#0a0a1a', grad3);
+const teamFloor = new THREE.Mesh(teamFloorGeo, teamFloorMat);
+teamFloor.rotation.x = -Math.PI / 2;
+teamFloor.position.y = -2;
+teamGroup.add(teamFloor);
+
+/* =========================================================
+   LIGHTING
+   ========================================================= */
+const ambient = new THREE.AmbientLight(0x404060, 0.6);
+scene.add(ambient);
+
+const dirLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+dirLight.position.set(5, 10, 5);
+scene.add(dirLight);
+
+const fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+fillLight.position.set(-5, 3, -5);
+scene.add(fillLight);
+
+/* =========================================================
+   CAMERA POSITIONS PER SCENE
+   ========================================================= */
+const camStates = {
+  s1_start:  { pos: [0, 8, 50],   look: [0, 5, 0] },
+  s1_end:    { pos: [0, 5, 15],   look: [0, 5, -20] },
+  s2_start:  { pos: [0, 3, 22],   look: [0, 0, 0] },
+  s2_end:    { pos: [12, 4, 12],  look: [0, 0, 0] },
+  s3_start:  { pos: [0, 2, 20],   look: [0, 1, 0] },
+  s3_end:    { pos: [0, 3, 8],    look: [0, 1, 0] }
+};
+
+function setCamera(state) {
+  camera.position.set(...state.pos);
+  camera.lookAt(new THREE.Vector3(...state.look));
+}
+setCamera(camStates.s1_start);
+
+/* =========================================================
+   SCROLL-DRIVEN ANIMATION
+   ========================================================= */
+const titleEl = document.getElementById('mainTitle');
+const subEl = document.getElementById('subTitle');
+const hintEl = document.getElementById('scrollHint');
+const labelEl = document.getElementById('sceneLabel');
+const progressEl = document.getElementById('progressBar');
+
+function showTitle(text, sub = '') {
+  titleEl.textContent = text;
+  subEl.textContent = sub;
+  gsap.to(titleEl, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' });
+  gsap.to(subEl, { opacity: 0.7, y: 0, duration: 0.8, delay: 0.2, ease: 'power3.out' });
+}
+
+function hideTitle() {
+  gsap.to(titleEl, { opacity: 0, y: -30, duration: 0.5 });
+  gsap.to(subEl, { opacity: 0, y: -20, duration: 0.5 });
+  gsap.to(hintEl, { opacity: 0, duration: 0.3 });
+}
+
+function showLabel(text) {
+  labelEl.textContent = text;
+  gsap.to(labelEl, { opacity: 1, duration: 0.6 });
+}
+function hideLabel() {
+  gsap.to(labelEl, { opacity: 0, duration: 0.4 });
+}
+
+/* Scene 1: City approach */
+ScrollTrigger.create({
+  trigger: '#scene1',
+  start: 'top top',
+  end: 'bottom top',
+  scrub: 1,
+  onUpdate: self => {
+    const p = self.progress;
+    const s = camStates.s1_start, e = camStates.s1_end;
+    camera.position.set(
+      s.pos[0] + (e.pos[0] - s.pos[0]) * p,
+      s.pos[1] + (e.pos[1] - s.pos[1]) * p,
+      s.pos[2] + (e.pos[2] - s.pos[2]) * p
+    );
+    camera.lookAt(
+      s.look[0] + (e.look[0] - s.look[0]) * p,
+      s.look[1] + (e.look[1] - s.look[1]) * p,
+      s.look[2] + (e.look[2] - s.look[2]) * p
+    );
+    progressEl.style.width = (p * 25) + '%';
+    if (p > 0.3) hideTitle();
+  },
+  onEnter: () => { cityGroup.visible = true; showTitle('NEXUS', 'Where Code Meets Craft'); },
+  onLeave: () => { cityGroup.visible = false; hideLabel(); }
+});
+
+/* Scene 2: Portfolio orbit */
+ScrollTrigger.create({
+  trigger: '#scene2',
+  start: 'top top',
+  end: 'bottom top',
+  scrub: 1,
+  onUpdate: self => {
+    const p = self.progress;
+    const angle = p * Math.PI * 0.8;
+    const r = 18 - p * 4;
+    camera.position.set(Math.sin(angle) * r, 3 + Math.sin(p * Math.PI) * 2, Math.cos(angle) * r);
+    camera.lookAt(0, 0, 0);
+    progressEl.style.width = (25 + p * 25) + '%';
+    /* Animate screens */
+    screens.forEach((s, i) => {
+      const a = (i / screens.length) * Math.PI * 2 + p * 0.5;
+      s.position.x = Math.cos(a) * 8;
+      s.position.z = Math.sin(a) * 8;
+      s.position.y = Math.sin(p * Math.PI * 2 + i) * 0.5;
+      s.lookAt(0, 0, 0);
+    });
+  },
+  onEnter: () => { portfolioGroup.visible = true; showLabel('Selected Works'); showTitle('Our Work', 'Six projects that define us'); },
+  onLeaveBack: () => { portfolioGroup.visible = false; cityGroup.visible = true; hideLabel(); hideTitle(); },
+  onLeave: () => { portfolioGroup.visible = false; hideLabel(); hideTitle(); }
+});
+
+/* Scene 3: Team figures */
+ScrollTrigger.create({
+  trigger: '#scene3',
+  start: 'top top',
+  end: 'bottom top',
+  scrub: 1,
+  onUpdate: self => {
+    const p = self.progress;
+    camera.position.set(p * 15 - 7.5, 2 + p, 20 - p * 10);
+    camera.lookAt(0, 1, 0);
+    progressEl.style.width = (50 + p * 25) + '%';
+    figures.forEach((f, i) => {
+      f.position.y = -2 + Math.sin(p * Math.PI + i * 0.5) * 0.5;
+      f.rotation.y = p * 0.3 + i * 0.2;
+    });
+  },
+  onEnter: () => { teamGroup.visible = true; showLabel('The Team'); showTitle('Our People', 'United by craft'); },
+  onLeaveBack: () => { teamGroup.visible = false; portfolioGroup.visible = true; hideLabel(); hideTitle(); },
+  onLeave: () => { teamGroup.visible = false; hideLabel(); hideTitle(); }
+});
+
+/* Scene 4: Ending — pull back */
+ScrollTrigger.create({
+  trigger: '#scene4',
+  start: 'top top',
+  end: 'bottom top',
+  scrub: 1,
+  onUpdate: self => {
+    const p = self.progress;
+    camera.position.set(0, 5 + p * 60, 15 + p * 100);
+    camera.lookAt(0, 0, 0);
+    progressEl.style.width = (75 + p * 25) + '%';
+    cityGroup.visible = true;
+    cityGroup.scale.set(1, 1, 1);
+    /* Fade out scene */
+    renderer.toneMappingExposure = 1.2 - p * 0.8;
+  },
+  onEnter: () => { showLabel('Get in Touch'); showTitle('Let\'s Build', 'hello@nexus.studio'); },
+  onLeaveBack: () => { hideLabel(); hideTitle(); }
+});
+
+/* =========================================================
+   ANIMATION LOOP
+   ========================================================= */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  /* City: subtle sway */
+  if (cityGroup.visible) {
+    sun.position.y = 12 + Math.sin(t * 0.3) * 0.5;
+    ring.material.opacity = 0.12 + Math.sin(t * 0.5) * 0.03;
+    linesGroup.children.forEach((l, i) => {
+      l.position.y += 0.02;
+      if (l.position.y > 15) l.position.y = -5;
+    });
+  }
+
+  /* Portfolio: screens float */
+  if (portfolioGroup.visible) {
+    particles.rotation.y = t * 0.02;
+  }
+
+  /* Team: figures bob */
+  if (teamGroup.visible) {
+    figures.forEach((f, i) => {
+      f.children[0].position.y = 1.2 + Math.sin(t * 1.5 + i * 0.8) * 0.15;
+      f.children[1].position.y = 2.7 + Math.sin(t * 1.5 + i * 0.8) * 0.15;
+    });
+  }
+
+  composer.render();
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+function init() {
+  const fill = document.getElementById('loadFill');
+  let p = 0;
+  const loadInterval = setInterval(() => {
+    p += 8 + Math.random() * 15;
+    if (p > 100) p = 100;
+    fill.style.width = p + '%';
+    if (p >= 100) {
+      clearInterval(loadInterval);
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('done');
+        animate();
+      }, 400);
+    }
+  }, 100);
+}
+
+init();
+
+/* Resize */
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
