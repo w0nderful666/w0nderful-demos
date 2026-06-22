@@ -1,0 +1,3423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Digital Studio</title>
+
+
+<!-- External Resources -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+
+<style>
+/* ============================================================
+   1. ARGON THEME OVERRIDES
+   ============================================================ */
+/* Kill Argon's page header and content above template */
+.page-header, .site-header, .custom-header,
+.entry-header, .page-title-area, .site-branding,
+.breadcrumbs, .breadcrumb-trail,
+.banner, .banner.section, section.banner,
+.float-action-buttons, .pcr-app,
+[class*="theme-color-picker"] {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+#content, .container, .page-content, #primary, .site-content,
+.wp-block, article, .entry-content, .entry-header, .argontemplate,
+#page, .page-wrapper, main, .main-content, .site-main,
+.page-template, .page, .hentry, .entry, .post,
+#main, .main, .content-area, .site-content-area,
+.argo-template, .argo-content, .page-inner,
+.site-content-contain, .wrap, .site-branding-container {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#navbar, .navbar, .site-header, .custom-header, #masthead,
+.back-to-top, #back-to-top, .backtotop, .scroll-top,
+.fabtn, [id*="fabtn"], [class*="fabtn"],
+.fab, .floating-action-button,
+.blog-settings, [class*="blog-settings"], [id*="blog-settings"],
+#secondary, .widget-area, .sidebar,
+.comments-area, #comments,
+.site-footer, #colophon, .entry-footer, .entry-meta {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* ============================================================
+   2. BASE / RESET
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  background: #050510 !important;
+}
+
+:root {
+  --bg-primary: rgba(0,0,0,0.06);
+  --bg-secondary: rgba(10,10,15,0.05);
+  --bg-card: rgba(255,255,255,0.03);
+  --text-primary: #fff;
+  --text-secondary: rgba(255,255,255,0.82);
+  --text-muted: rgba(255,255,255,0.55);
+  --text-decoration: rgba(255,255,255,0.15);
+  --border: rgba(255,255,255,0.08);
+  --accent: #0071e3;
+}
+
+body.light-mode {
+  --bg-primary: rgba(255,255,255,0.1);
+  --bg-secondary: rgba(250,250,250,0.08);
+  --bg-card: rgba(255,255,255,0.08);
+  --text-primary: #1a1a1a;
+  --text-secondary: rgba(0,0,0,0.82);
+  --text-muted: rgba(0,0,0,0.58);
+  --text-decoration: rgba(0,0,0,0.08);
+  --border: rgba(0,0,0,0.08);
+  --accent: #0071e3;
+}
+
+/* html background already set above to #000 */
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-primary) !important;
+  background: transparent !important;
+  overflow-x: hidden;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.nx-section {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+  z-index: 1;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+a {
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--text-primary);
+}
+
+/* --- Light mode cursor glow --- */
+body.light-mode .cursor-glow {
+  background: radial-gradient(circle, rgba(0,113,227,0.08) 0%, transparent 70%);
+}
+
+/* ============================================================
+   3. CUSTOM CURSOR
+   ============================================================ */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  mix-blend-mode: difference;
+}
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(0,113,227,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99997;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.cursor-trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background: rgba(0,113,227,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+@media (max-width: 768px) {
+  .cursor-dot, .cursor-glow, .cursor-trail {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   4. NAVIGATION
+   ============================================================ */
+.nx-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10000;
+  transition: background 0.4s ease;
+}
+
+.nx-nav-logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  transition: color 0.4s ease;
+}
+
+.nx-nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nx-nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.nx-nav-links a:hover {
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   5. PROGRESS BAR
+   ============================================================ */
+.nx-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0071e3, #00c6ff);
+  z-index: 10001;
+  width: 0%;
+  will-change: width;
+}
+
+/* ============================================================
+   6. WEBGL CANVAS
+   ============================================================ */
+#nx-webgl {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ============================================================
+   7. LOADING SCREEN
+   ============================================================ */
+.nx-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.6s ease;
+}
+
+.nx-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nx-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: nx-spin 0.8s linear infinite;
+}
+
+@keyframes nx-spin {
+  to { transform: rotate(360deg); }
+}
+
+.nx-loading-text {
+  margin-top: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   8. SECTION STYLES
+   ============================================================ */
+
+/* --- HERO --- */
+.nx-hero {
+  height: 200vh;
+  position: relative;
+}
+
+.nx-hero-sticky {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.nx-hero-title {
+  font-size: clamp(80px, 15vw, 200px);
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -4px;
+  line-height: 1;
+  will-change: transform, opacity;
+  position: relative;
+  z-index: 2;
+}
+
+.nx-hero-subtitle {
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-top: 16px;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+
+.nx-hero-ctas {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  z-index: 2;
+  will-change: transform, opacity;
+}
+
+.nx-btn-primary {
+  display: inline-block;
+  padding: 14px 36px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.nx-btn-primary:hover {
+  background: #0077ed;
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.nx-btn-ghost {
+  display: inline-block;
+  padding: 14px 36px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 50px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.nx-btn-ghost:hover {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+  color: var(--text-primary);
+}
+
+/* --- MANIFESTO / OPENING STATEMENT --- */
+.nx-manifesto {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  padding: 0 24px;
+}
+
+.nx-manifesto-inner {
+  text-align: center;
+  max-width: 900px;
+}
+
+.nx-manifesto-sentence {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 24px;
+  will-change: transform, opacity;
+}
+
+/* --- MARQUEE --- */
+.nx-marquee {
+  background: var(--bg-secondary);
+  padding: 12px 0;
+  overflow: hidden;
+}
+
+.nx-marquee-track {
+  display: flex;
+  animation: nx-marquee 20s linear infinite;
+  white-space: nowrap;
+}
+
+.nx-marquee-text {
+  font-size: clamp(20px, 3.5vw, 44px);
+  font-weight: 700;
+  color: var(--text-decoration);
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+@keyframes nx-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* --- STATS (light) --- */
+.nx-stats {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+}
+
+.nx-stats-inner {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nx-stats-left {
+  flex: 1;
+}
+
+.nx-stats-left .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-stats-left h2 {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+
+.nx-stats-left p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.nx-stats-right {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.nx-stat-card {
+  background: var(--bg-card);
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  will-change: transform, opacity;
+}
+
+.nx-stat-number {
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.nx-stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+
+/* --- WORK INTRO --- */
+.nx-work-intro {
+  padding: 140px 40px;
+  text-align: center;
+  background: var(--bg-secondary);
+}
+
+.nx-work-intro .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nx-work-intro h2 {
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.nx-work-intro p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* --- WORK SHOWCASE --- */
+.nx-showcase {
+  position: relative;
+}
+
+.nx-showcase-sticky {
+  min-height: 100vh;
+  position: relative;
+  top: 0;
+  display: flex;
+  align-items: center;
+  padding: 80px;
+  gap: 60px;
+  overflow: hidden;
+}
+
+.nx-showcase-aurora {
+  background: linear-gradient(135deg, rgba(10,10,46,0.65) 0%, rgba(26,10,62,0.65) 50%, rgba(10,26,62,0.65) 100%);
+}
+
+.nx-showcase-vortex {
+  background: linear-gradient(135deg, rgba(10,42,26,0.65) 0%, rgba(10,58,42,0.65) 50%, rgba(26,58,42,0.65) 100%);
+}
+
+.nx-showcase-echo {
+  background: linear-gradient(135deg, rgba(42,10,10,0.65) 0%, rgba(58,26,10,0.65) 50%, rgba(58,42,10,0.65) 100%);
+}
+
+.nx-showcase-mirrored {
+  flex-direction: row-reverse;
+}
+
+.nx-showcase-text {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.nx-showcase-number {
+  font-size: clamp(100px, 15vw, 200px);
+  font-weight: 900;
+  color: var(--text-decoration);
+  position: absolute;
+  top: -60px;
+  left: -20px;
+  line-height: 1;
+  z-index: 0;
+}
+
+.nx-showcase-tag {
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.nx-showcase-title {
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+  will-change: transform, opacity;
+}
+
+.nx-showcase-desc {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 450px;
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+
+.nx-showcase-visual {
+  flex: 1;
+  height: 500px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity;
+  position: relative;
+  overflow: hidden;
+}
+
+.nx-showcase-visual-aurora {
+  background: linear-gradient(135deg, #1a0a4e, #3a1a6e, #0071e3);
+}
+
+.nx-showcase-visual-vortex {
+  background: linear-gradient(135deg, #0a3a2a, #1a5a4a, #0a7a5a);
+}
+
+.nx-showcase-visual-echo {
+  background: linear-gradient(135deg, #3a1a0a, #5a2a0a, #7a3a1a);
+}
+
+.nx-showcase-visual-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  background: repeating-conic-gradient(rgba(255,255,255,0.1) 0% 25%, transparent 0% 50%) 0 0 / 60px 60px;
+  animation: nx-pattern-rotate 30s linear infinite;
+}
+
+@keyframes nx-pattern-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* --- ALL PROJECTS --- */
+.nx-projects {
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.nx-projects-header {
+  padding: 100px 80px 40px;
+  text-align: center;
+}
+
+.nx-projects-header .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nx-projects-header h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.nx-projects-header p {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.nx-projects-track-wrapper {
+  height: 100vh;
+  position: relative;
+}
+
+.nx-projects-track {
+  display: flex;
+  gap: 32px;
+  padding: 0 80px;
+  align-items: center;
+  height: 100%;
+  will-change: transform;
+}
+
+.nx-project-card {
+  flex-shrink: 0;
+  width: 360px;
+  aspect-ratio: 4/5;
+  border-radius: 20px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+.nx-project-card-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.nx-project-card:nth-child(1) .nx-project-card-bg { background: linear-gradient(135deg, #1a0a4e, #3a1a6e); }
+.nx-project-card:nth-child(2) .nx-project-card-bg { background: linear-gradient(135deg, #0a3a2a, #1a5a4a); }
+.nx-project-card:nth-child(3) .nx-project-card-bg { background: linear-gradient(135deg, #3a1a0a, #5a2a0a); }
+.nx-project-card:nth-child(4) .nx-project-card-bg { background: linear-gradient(135deg, #1a1a3a, #2a2a5a); }
+.nx-project-card:nth-child(5) .nx-project-card-bg { background: linear-gradient(135deg, #2a1a2a, #4a2a4a); }
+.nx-project-card:nth-child(6) .nx-project-card-bg { background: linear-gradient(135deg, #0a2a3a, #1a4a5a); }
+
+.nx-project-card-watermark {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--text-decoration);
+  line-height: 1;
+  z-index: 1;
+}
+
+.nx-project-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.nx-project-card-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.nx-project-card-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.nx-project-card-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --- WORKFLOW / PROCESS --- */
+.nx-workflow {
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.nx-workflow-header {
+  padding: 100px 80px 40px;
+  text-align: center;
+}
+
+.nx-workflow-header .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-workflow-header h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.nx-workflow-header p {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.nx-workflow-track-wrapper {
+  height: 100vh;
+  position: relative;
+}
+
+.nx-workflow-track {
+  display: flex;
+  gap: 32px;
+  padding: 0 80px;
+  align-items: center;
+  height: 100%;
+  will-change: transform;
+}
+
+.nx-workflow-card {
+  flex-shrink: 0;
+  width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  will-change: transform, opacity;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.nx-workflow-icon {
+  font-size: 40px;
+  margin-bottom: 20px;
+}
+
+.nx-workflow-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.nx-workflow-card p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* --- ABOUT --- */
+.nx-about {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+}
+
+.nx-about-inner {
+  display: flex;
+  gap: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.nx-about-visual {
+  flex: 1;
+  height: 500px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #0071e3, #00c6ff, #7b61ff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.nx-about-letter {
+  font-size: 200px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.2);
+  line-height: 1;
+}
+
+.nx-about-est {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 16px;
+}
+
+.nx-about-content {
+  flex: 1;
+  will-change: transform, opacity;
+}
+
+.nx-about-content .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-about-content h2 {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  line-height: 1.1;
+}
+
+.nx-about-content p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+/* --- DESIGN PHILOSOPHY --- */
+.nx-philosophy {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  padding: 80px 40px;
+}
+
+.nx-philosophy-word {
+  text-align: center;
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+.nx-philosophy-word h2 {
+  font-size: clamp(60px, 12vw, 160px);
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.nx-philosophy-word .subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+/* --- SKILLS --- */
+.nx-skills {
+  padding: 120px 40px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-skills .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nx-skills h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.nx-skills > .subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 60px;
+}
+
+.nx-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.nx-skill-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: left;
+  will-change: transform, opacity;
+  transition: border-color 0.3s ease;
+}
+
+.nx-skill-card:hover {
+  border-color: var(--accent);
+}
+
+.nx-skill-num {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nx-skill-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.nx-skill-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* --- TEAM --- */
+.nx-team {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-team .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-team h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.nx-team > .subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-bottom: 60px;
+}
+
+.nx-team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nx-team-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 32px 20px;
+  text-align: center;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  will-change: transform, opacity;
+}
+
+.nx-team-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.nx-team-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.nx-team-card .role {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* --- VALUES --- */
+.nx-values {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  padding: 80px 40px;
+  position: relative;
+}
+
+.nx-value-item {
+  text-align: center;
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+.nx-value-item h3 {
+  font-size: clamp(24px, 3.5vw, 40px);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.nx-value-item p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* --- TIMELINE --- */
+.nx-timeline {
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.nx-timeline-header {
+  padding: 100px 80px 40px;
+  text-align: center;
+}
+
+.nx-timeline-header h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.nx-timeline-track-wrapper {
+  height: 100vh;
+  position: relative;
+}
+
+.nx-timeline-track {
+  display: flex;
+  gap: 32px;
+  padding: 0 80px;
+  align-items: center;
+  height: 100%;
+  will-change: transform;
+}
+
+.nx-timeline-card {
+  flex-shrink: 0;
+  width: 300px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  will-change: transform, opacity;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.nx-timeline-year {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.nx-timeline-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.nx-timeline-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* --- TESTIMONIALS --- */
+.nx-testimonials {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-testimonials .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nx-testimonials h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 60px;
+}
+
+.nx-testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nx-testimonial-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: left;
+  will-change: transform, opacity;
+}
+
+.nx-testimonial-quote {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.nx-testimonial-text {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.nx-testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nx-testimonial-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.nx-testimonial-info h5 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.nx-testimonial-info span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* --- AWARDS --- */
+.nx-awards {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-awards .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-awards h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 60px;
+}
+
+.nx-awards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nx-award-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  will-change: transform, opacity;
+}
+
+.nx-award-icon {
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+
+.nx-award-card h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.nx-award-card .year {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.nx-award-card .project {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* --- TECH STACK --- */
+.nx-techstack {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-techstack .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.nx-techstack h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 60px;
+}
+
+.nx-techstack-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nx-techstack-category h4 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-techstack-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.nx-techstack-pill {
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  will-change: transform, opacity;
+}
+
+/* --- BLOG / INSIGHTS --- */
+.nx-blog {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-blog .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-blog h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 60px;
+}
+
+.nx-blog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.nx-blog-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: left;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  will-change: transform, opacity;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nx-blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.nx-blog-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.nx-blog-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.nx-blog-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.nx-blog-card a {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.nx-blog-card a:hover {
+  color: #005bb5;
+}
+
+/* --- BRANDS MARQUEE --- */
+.nx-brands-marquee {
+  padding: 60px 0;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.nx-brands-marquee-track {
+  display: flex;
+  animation: nx-brands-scroll 25s linear infinite;
+  white-space: nowrap;
+}
+
+.nx-brand-item {
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--text-decoration);
+  padding: 0 40px;
+  flex-shrink: 0;
+}
+
+@keyframes nx-brands-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* --- NUMBERS 2 --- */
+.nx-numbers2 {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+}
+
+.nx-numbers2-inner {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nx-numbers2-left {
+  flex: 1;
+}
+
+.nx-numbers2-left .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-numbers2-left h2 {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+
+.nx-numbers2-left p {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.nx-numbers2-right {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.nx-numbers2-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 32px;
+  border-radius: 16px;
+  will-change: transform, opacity;
+}
+
+.nx-numbers2-card .nx-stat-number {
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.nx-numbers2-card .nx-stat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+
+/* --- CTA --- */
+.nx-cta {
+  padding: 160px 40px;
+  background: var(--bg-secondary);
+  text-align: center;
+  position: relative;
+}
+
+.nx-cta h2 {
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  will-change: transform, opacity, filter;
+}
+
+.nx-cta p {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto 40px;
+}
+
+.nx-cta .nx-btn-primary {
+  font-size: 17px;
+  padding: 18px 48px;
+}
+
+/* --- CONTACT --- */
+.nx-contact {
+  padding: 120px 80px;
+  background: var(--bg-secondary);
+  text-align: center;
+}
+
+.nx-contact .section-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.nx-contact h2 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.nx-contact-email {
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 40px;
+  display: inline-block;
+}
+
+.nx-contact-socials {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.nx-contact-social {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.nx-contact-social:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+}
+
+.nx-contact-social:hover svg {
+  fill: var(--text-primary);
+}
+
+.nx-contact-social svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-muted);
+  transition: fill 0.3s ease;
+}
+
+/* --- FOOTER --- */
+.nx-footer {
+  padding: 40px;
+  background: var(--bg-primary);
+  text-align: center;
+}
+
+.nx-footer p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.nx-theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  padding: 0;
+}
+.nx-theme-toggle:hover {
+  background: var(--bg-card);
+  border-color: var(--text-muted);
+}
+
+/* ============================================================
+   9. RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .nx-nav {
+    padding: 16px 20px;
+  }
+
+  .nx-nav-links {
+    display: none;
+  }
+
+  .nx-hero-title {
+    letter-spacing: -2px;
+  }
+
+  .nx-stats {
+    padding: 80px 24px;
+  }
+
+  .nx-stats-inner {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .nx-stats-right {
+    width: 100%;
+  }
+
+  .nx-work-intro {
+    padding: 80px 24px;
+  }
+
+  .nx-showcase-sticky {
+    flex-direction: column;
+    padding: 40px 24px;
+    gap: 32px;
+  }
+
+  .nx-showcase-mirrored {
+    flex-direction: column;
+  }
+
+  .nx-showcase-visual {
+    height: 300px;
+    width: 100%;
+  }
+
+  .nx-showcase-number {
+    font-size: 100px;
+    top: -30px;
+  }
+
+  .nx-projects-header {
+    padding: 80px 24px 40px;
+  }
+
+  .nx-projects-track,
+  .nx-workflow-track,
+  .nx-timeline-track {
+    padding: 0 24px;
+  }
+
+  .nx-project-card {
+    width: 280px;
+  }
+
+  .nx-workflow-header {
+    padding: 80px 24px 40px;
+  }
+
+  .nx-about {
+    padding: 80px 24px;
+  }
+
+  .nx-about-inner {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .nx-about-visual {
+    height: 300px;
+    width: 100%;
+  }
+
+  .nx-team {
+    padding: 80px 24px;
+  }
+
+  .nx-team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .nx-skills {
+    padding: 80px 24px;
+  }
+
+  .nx-testimonials {
+    padding: 80px 24px;
+  }
+
+  .nx-testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nx-awards {
+    padding: 80px 24px;
+  }
+
+  .nx-awards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .nx-techstack {
+    padding: 80px 24px;
+  }
+
+  .nx-techstack-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .nx-blog {
+    padding: 80px 24px;
+  }
+
+  .nx-blog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nx-numbers2 {
+    padding: 80px 24px;
+  }
+
+  .nx-numbers2-inner {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .nx-cta {
+    padding: 100px 24px;
+  }
+
+  .nx-contact {
+    padding: 80px 24px;
+  }
+
+  .nx-timeline-header {
+    padding: 80px 24px 40px;
+  }
+
+  .nx-skill-card {
+    width: 150px;
+    padding: 20px 14px;
+  }
+}
+/* ============================================================
+   PARTICLE CONTROL PANEL
+   ============================================================ */
+
+
+
+
+@media (max-width: 768px) {
+  #nx-particle-controls {
+    display: none !important;
+  }
+}
+</style>
+
+<body>
+
+
+<!-- ============================================================
+     CUSTOM CURSOR
+     ============================================================ -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+
+<!-- ============================================================
+     PROGRESS BAR
+     ============================================================ -->
+<div class="nx-progress" id="nxProgress"></div>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav class="nx-nav" id="nxNav">
+  <div class="nx-nav-logo">NEXUS</div>
+  <ul class="nx-nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button id="theme-toggle" class="nx-theme-toggle" aria-label="Toggle theme">☀️</button>
+</nav>
+
+<!-- ============================================================
+     WEBGL CANVAS
+     ============================================================ -->
+<canvas id="nx-webgl"></canvas>
+
+<!-- ============================================================
+     LOADING SCREEN
+     ============================================================ -->
+<div class="nx-loading" id="nxLoading">
+  <div class="nx-spinner"></div>
+  <div class="nx-loading-text">NEXUS</div>
+</div>
+
+<!-- ============================================================
+     1. HERO
+     ============================================================ -->
+<section class="nx-section nx-hero" id="hero">
+  <div class="nx-hero-sticky">
+    <h1 class="nx-hero-title">NEXUS</h1>
+    <p class="nx-hero-subtitle">Where Code Meets Craft</p>
+    <div class="nx-hero-ctas">
+      <a href="#work" class="nx-btn-primary">View Our Work</a>
+      <a href="#contact" class="nx-btn-ghost">Get in Touch</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     2. OPENING STATEMENT (MANIFESTO)
+     ============================================================ -->
+<section class="nx-section nx-manifesto" id="manifesto">
+  <div class="nx-manifesto-inner">
+    <div class="nx-manifesto-sentence">We don't just build products.</div>
+    <div class="nx-manifesto-sentence">We craft digital experiences.</div>
+    <div class="nx-manifesto-sentence">Where every pixel has purpose.</div>
+    <div class="nx-manifesto-sentence">And every line of code tells a story.</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     3. MARQUEE
+     ============================================================ -->
+<section class="nx-section nx-marquee">
+  <div class="nx-marquee-track">
+    <span class="nx-marquee-text">DESIGN · DEVELOP · CREATE · INNOVATE · RESEARCH · ITERATE</span>
+    <span class="nx-marquee-text">DESIGN · DEVELOP · CREATE · INNOVATE · RESEARCH · ITERATE</span>
+    <span class="nx-marquee-text">DESIGN · DEVELOP · CREATE · INNOVATE · RESEARCH · ITERATE</span>
+    <span class="nx-marquee-text">DESIGN · DEVELOP · CREATE · INNOVATE · RESEARCH · ITERATE</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     4. STATS
+     ============================================================ -->
+<section class="nx-section nx-stats" id="stats">
+  <div class="nx-stats-inner">
+    <div class="nx-stats-left">
+      <div class="section-eyebrow">BY THE NUMBERS</div>
+      <h2>Seven Years of Digital Craft</h2>
+      <p>Since 2019, we've been pushing the boundaries of what's possible in digital design and development. Every project is a chance to innovate, and every challenge is an opportunity to excel.</p>
+    </div>
+    <div class="nx-stats-right">
+      <div class="nx-stat-card">
+        <div class="nx-stat-number"><span class="nx-count" data-target="48">0</span>+</div>
+        <div class="nx-stat-label">PROJECTS DELIVERED</div>
+      </div>
+      <div class="nx-stat-card">
+        <div class="nx-stat-number"><span class="nx-count" data-target="7">0</span></div>
+        <div class="nx-stat-label">YEARS OF CRAFT</div>
+      </div>
+      <div class="nx-stat-card">
+        <div class="nx-stat-number"><span class="nx-count" data-target="120">0</span>+</div>
+        <div class="nx-stat-label">TECHNOLOGIES</div>
+      </div>
+      <div class="nx-stat-card">
+        <div class="nx-stat-number"><span class="nx-count-decimal" data-target="99.9">0</span>%</div>
+        <div class="nx-stat-label">UPTIME GUARANTEED</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     5. WORK INTRO
+     ============================================================ -->
+<section class="nx-section nx-work-intro" id="work">
+  <div class="section-eyebrow">PORTFOLIO</div>
+  <h2>Selected Works</h2>
+  <p>A curated selection of projects that showcase our approach to design, development, and digital innovation.</p>
+</section>
+
+<!-- ============================================================
+     6. WORK SHOWCASE — AURORA
+     ============================================================ -->
+<section class="nx-section nx-showcase nx-showcase-aurora" id="aurora">
+  <div class="nx-showcase-sticky">
+    <div class="nx-showcase-text">
+      <div class="nx-showcase-number">01</div>
+      <div class="nx-showcase-tag">AI-POWERED DESIGN</div>
+      <h2 class="nx-showcase-title">Aurora</h2>
+      <p class="nx-showcase-desc">An AI-powered design tool that learns from your creative patterns and suggests intelligent design solutions. Built with real-time collaboration at its core.</p>
+    </div>
+    <div class="nx-showcase-visual nx-showcase-visual-aurora">
+      <div class="nx-showcase-visual-pattern"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     7. WORK SHOWCASE — VORTEX
+     ============================================================ -->
+<section class="nx-section nx-showcase nx-showcase-vortex" id="vortex">
+  <div class="nx-showcase-sticky nx-showcase-mirrored">
+    <div class="nx-showcase-text">
+      <div class="nx-showcase-number">02</div>
+      <div class="nx-showcase-tag">REAL-TIME ANALYTICS</div>
+      <h2 class="nx-showcase-title">Vortex</h2>
+      <p class="nx-showcase-desc">A real-time data visualization dashboard that transforms complex datasets into beautiful, interactive visual narratives. Processing millions of data points per second.</p>
+    </div>
+    <div class="nx-showcase-visual nx-showcase-visual-vortex">
+      <div class="nx-showcase-visual-pattern"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     8. WORK SHOWCASE — ECHO
+     ============================================================ -->
+<section class="nx-section nx-showcase nx-showcase-echo" id="echo">
+  <div class="nx-showcase-sticky">
+    <div class="nx-showcase-text">
+      <div class="nx-showcase-number">03</div>
+      <div class="nx-showcase-tag">SPATIAL AUDIO</div>
+      <h2 class="nx-showcase-title">Echo</h2>
+      <p class="nx-showcase-desc">A spatial audio experience that pushes the boundaries of WebGL and Web Audio API. Immersive soundscapes that respond to user interaction in real time.</p>
+    </div>
+    <div class="nx-showcase-visual nx-showcase-visual-echo">
+      <div class="nx-showcase-visual-pattern"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     9. ALL PROJECTS — HORIZONTAL SCROLL
+     ============================================================ -->
+<section class="nx-section nx-projects" id="projects">
+  <div class="nx-projects-header">
+    <div class="section-eyebrow">MORE WORK</div>
+    <h2>All Projects</h2>
+    <p>Explore our complete portfolio of digital experiences.</p>
+  </div>
+  <div class="nx-projects-track-wrapper">
+    <div class="nx-projects-track" id="projectsTrack">
+      <div class="nx-project-card">
+        <div class="nx-project-card-bg"></div>
+        <div class="nx-project-card-watermark">01</div>
+        <div class="nx-project-card-content">
+          <div class="nx-project-card-tag">BLOCKCHAIN</div>
+          <h3 class="nx-project-card-title">Nebula</h3>
+          <p class="nx-project-card-desc">Decentralized Identity Platform</p>
+        </div>
+      </div>
+      <div class="nx-project-card">
+        <div class="nx-project-card-bg"></div>
+        <div class="nx-project-card-watermark">02</div>
+        <div class="nx-project-card-content">
+          <div class="nx-project-card-tag">MOBILE</div>
+          <h3 class="nx-project-card-title">Horizon</h3>
+          <p class="nx-project-card-desc">Cross-Platform Fitness Tracker</p>
+        </div>
+      </div>
+      <div class="nx-project-card">
+        <div class="nx-project-card-bg"></div>
+        <div class="nx-project-card-watermark">03</div>
+        <div class="nx-project-card-content">
+          <div class="nx-project-card-tag">API</div>
+          <h3 class="nx-project-card-title">Vertex</h3>
+          <p class="nx-project-card-desc">High-Performance API Gateway</p>
+        </div>
+      </div>
+      <div class="nx-project-card">
+        <div class="nx-project-card-bg"></div>
+        <div class="nx-project-card-watermark">04</div>
+        <div class="nx-project-card-content">
+          <div class="nx-project-card-tag">E-COMMERCE</div>
+          <h3 class="nx-project-card-title">Meridian</h3>
+          <p class="nx-project-card-desc">Luxury E-Commerce Redesign</p>
+        </div>
+      </div>
+      <div class="nx-project-card">
+        <div class="nx-project-card-bg"></div>
+        <div class="nx-project-card-watermark">05</div>
+        <div class="nx-project-card-content">
+          <div class="nx-project-card-tag">DEVELOPER TOOL</div>
+          <h3 class="nx-project-card-title">Prism</h3>
+          <p class="nx-project-card-desc">Collaborative Code Editor</p>
+        </div>
+      </div>
+      <div class="nx-project-card">
+        <div class="nx-project-card-bg"></div>
+        <div class="nx-project-card-watermark">06</div>
+        <div class="nx-project-card-content">
+          <div class="nx-project-card-tag">CREATIVE</div>
+          <h3 class="nx-project-card-title">Flux</h3>
+          <p class="nx-project-card-desc">Generative Art Platform</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     10. PROCESS / WORKFLOW
+     ============================================================ -->
+<section class="nx-section nx-workflow" id="workflow">
+  <div class="nx-workflow-header">
+    <div class="section-eyebrow">OUR PROCESS</div>
+    <h2>How We Work</h2>
+    <p>A proven methodology refined over hundreds of projects.</p>
+  </div>
+  <div class="nx-workflow-track-wrapper">
+    <div class="nx-workflow-track" id="workflowTrack">
+      <div class="nx-workflow-card">
+        <div class="nx-workflow-icon">🔍</div>
+        <h3>Research</h3>
+        <p>Deep dive into user needs, market analysis, and technical constraints. We understand the problem before building the solution.</p>
+      </div>
+      <div class="nx-workflow-card">
+        <div class="nx-workflow-icon">✏️</div>
+        <h3>Design</h3>
+        <p>Pixel-perfect interfaces crafted with intention and attention to detail. Every element serves a purpose.</p>
+      </div>
+      <div class="nx-workflow-card">
+        <div class="nx-workflow-icon">⚡</div>
+        <h3>Develop</h3>
+        <p>Clean, performant code built with modern technologies and best practices. Scalable from day one.</p>
+      </div>
+      <div class="nx-workflow-card">
+        <div class="nx-workflow-icon">🚀</div>
+        <h3>Launch</h3>
+        <p>Rigorous testing, smooth deployment, and ongoing support. We're with you every step of the way.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     11. ABOUT
+     ============================================================ -->
+<section class="nx-section nx-about" id="about">
+  <div class="nx-about-inner">
+    <div class="nx-about-visual">
+      <div class="nx-about-letter">N</div>
+      <div class="nx-about-est">EST. 2019</div>
+    </div>
+    <div class="nx-about-content">
+      <div class="section-eyebrow">ABOUT</div>
+      <h2>Where Art Meets Engineering</h2>
+      <p>NEXUS is a digital studio founded on the belief that technology and design are inseparable. We're a collective of engineers, designers, and strategists who thrive at the intersection of creativity and code.</p>
+      <p>Our studio was born from a simple observation: the best digital products aren't just well-designed or well-engineered — they're both. Every project we take on is an opportunity to prove that beauty and performance can coexist.</p>
+      <p>Based in the cloud, working with clients worldwide, we bring a global perspective to every challenge. Our team spans continents, time zones, and disciplines — united by a shared obsession with quality.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     12. DESIGN PHILOSOPHY
+     ============================================================ -->
+<section class="nx-section nx-philosophy" id="philosophy">
+  <div class="nx-philosophy-word" id="philWord1">
+    <h2>CRAFT</h2>
+    <div class="subtitle">PRECISION IN EVERY DETAIL</div>
+  </div>
+  <div class="nx-philosophy-word" id="philWord2">
+    <h2>PRECISION</h2>
+    <div class="subtitle">ENGINEERED WITH INTENT</div>
+  </div>
+  <div class="nx-philosophy-word" id="philWord3">
+    <h2>IMPACT</h2>
+    <div class="subtitle">RESULTS THAT RESONATE</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     13. SKILLS
+     ============================================================ -->
+<section class="nx-section nx-skills" id="skills">
+  <div class="section-eyebrow">EXPERTISE</div>
+  <h2>What We Do</h2>
+  <p class="subtitle">Eight disciplines, one unified approach to digital excellence.</p>
+  <div class="nx-skills-grid" id="skillsFan">
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">01</div>
+      <div class="nx-skill-name">UI/UX Design</div>
+      <div class="nx-skill-desc">User-centered interfaces crafted with intention and precision</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">02</div>
+      <div class="nx-skill-name">Frontend Engineering</div>
+      <div class="nx-skill-desc">Pixel-perfect, performant interfaces built with modern frameworks</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">03</div>
+      <div class="nx-skill-name">Backend Systems</div>
+      <div class="nx-skill-desc">Scalable, robust architectures that power complex applications</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">04</div>
+      <div class="nx-skill-name">Cloud Infrastructure</div>
+      <div class="nx-skill-desc">Infrastructure that scales seamlessly with your growth</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">05</div>
+      <div class="nx-skill-name">Mobile Development</div>
+      <div class="nx-skill-desc">Native and cross-platform applications for every device</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">06</div>
+      <div class="nx-skill-name">Security</div>
+      <div class="nx-skill-desc">Enterprise-grade protection for your digital assets</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">07</div>
+      <div class="nx-skill-name">AI & Machine Learning</div>
+      <div class="nx-skill-desc">Intelligent systems that learn, adapt, and evolve</div>
+    </div>
+    <div class="nx-skill-card">
+      <div class="nx-skill-num">08</div>
+      <div class="nx-skill-name">Data Engineering</div>
+      <div class="nx-skill-desc">Insights and pipelines that drive informed decisions</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     14. TEAM
+     ============================================================ -->
+<section class="nx-section nx-team" id="team">
+  <div class="section-eyebrow">OUR PEOPLE</div>
+  <h2>The Team</h2>
+  <p class="subtitle">12 minds, one vision.</p>
+  <div class="nx-team-grid">
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#0071e3,#00c6ff)">AK</div>
+      <h4>Alex Kovacs</h4>
+      <span class="role">Creative Director</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#ff6b6b,#ee5a24)">MC</div>
+      <h4>Maya Chen</h4>
+      <span class="role">Lead Designer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">JR</div>
+      <h4>Jonas Richter</h4>
+      <span class="role">Lead Engineer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#00b894,#55efc4)">SP</div>
+      <h4>Sofia Petrov</h4>
+      <span class="role">AI/ML Engineer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#fdcb6e,#e17055)">LN</div>
+      <h4>Liam Nakamura</h4>
+      <span class="role">Frontend Engineer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#e056fd,#be2edd)">ET</div>
+      <h4>Elena Torres</h4>
+      <span class="role">Backend Engineer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#0984e3,#74b9ff)">RS</div>
+      <h4>Rohan Sharma</h4>
+      <span class="role">DevOps Engineer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#fd79a8,#e84393)">AW</div>
+      <h4>Amara Williams</h4>
+      <span class="role">UX Researcher</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#00cec9,#81ecec)">KB</div>
+      <h4>Kai Bergström</h4>
+      <span class="role">3D / WebGL</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#636e72,#b2bec3)">NL</div>
+      <h4>Nadia Lee</h4>
+      <span class="role">Product Manager</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#2d3436,#636e72)">DM</div>
+      <h4>Daniel Mwangi</h4>
+      <span class="role">Security Engineer</span>
+    </div>
+    <div class="nx-team-card">
+      <div class="nx-team-avatar" style="background:linear-gradient(135deg,#fab1a0,#ff7675)">IV</div>
+      <h4>Isla Volkov</h4>
+      <span class="role">Mobile Engineer</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     15. VALUES
+     ============================================================ -->
+<section class="nx-section nx-values" id="values">
+  <div class="nx-value-item" id="value1">
+    <h3>Quality Over Quantity</h3>
+    <p>We'd rather ship one perfect thing than ten mediocre ones.</p>
+  </div>
+  <div class="nx-value-item" id="value2">
+    <h3>Obsessive Craft</h3>
+    <p>Every interaction, every transition, every pixel matters.</p>
+  </div>
+  <div class="nx-value-item" id="value3">
+    <h3>Relentless Curiosity</h3>
+    <p>We explore the edges of what's possible, then push further.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     16. TIMELINE
+     ============================================================ -->
+<section class="nx-section nx-timeline" id="timeline">
+  <div class="nx-timeline-header">
+    <h2>Our Journey</h2>
+  </div>
+  <div class="nx-timeline-track-wrapper">
+    <div class="nx-timeline-track" id="timelineTrack">
+      <div class="nx-timeline-card">
+        <div class="nx-timeline-year">2019</div>
+        <h4>Founded</h4>
+        <p>NEXUS was born from a shared vision of bridging design and engineering excellence.</p>
+      </div>
+      <div class="nx-timeline-card">
+        <div class="nx-timeline-year">2020</div>
+        <h4>First Major Client</h4>
+        <p>Landed our first enterprise client, delivering a complete digital transformation.</p>
+      </div>
+      <div class="nx-timeline-card">
+        <div class="nx-timeline-year">2022</div>
+        <h4>Expanded to 12</h4>
+        <p>Grew the team to twelve specialists spanning design, engineering, and strategy.</p>
+      </div>
+      <div class="nx-timeline-card">
+        <div class="nx-timeline-year">2023</div>
+        <h4>Design Awards</h4>
+        <p>Recognized by Awwwards and FWA for outstanding digital craftsmanship.</p>
+      </div>
+      <div class="nx-timeline-card">
+        <div class="nx-timeline-year">2024</div>
+        <h4>AI Division</h4>
+        <p>Launched our dedicated AI/ML division, integrating intelligence into every project.</p>
+      </div>
+      <div class="nx-timeline-card">
+        <div class="nx-timeline-year">2025</div>
+        <h4>The Future</h4>
+        <p>Exploring new frontiers in spatial computing, generative design, and beyond.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     17. TESTIMONIALS
+     ============================================================ -->
+<section class="nx-section nx-testimonials" id="testimonials">
+  <div class="section-eyebrow">TESTIMONIALS</div>
+  <h2>What They Say</h2>
+  <div class="nx-testimonials-grid">
+    <div class="nx-testimonial-card nx-testimonial-parallax" data-speed="0.8">
+      <div class="nx-testimonial-quote">"</div>
+      <p class="nx-testimonial-text">NEXUS transformed our digital presence. Their attention to detail is unmatched. Every interaction feels intentional, every animation purposeful.</p>
+      <div class="nx-testimonial-author">
+        <div class="nx-testimonial-avatar" style="background:linear-gradient(135deg,#0071e3,#00c6ff)">SK</div>
+        <div class="nx-testimonial-info">
+          <h5>Sarah Kim</h5>
+          <span>CTO at Helion</span>
+        </div>
+      </div>
+    </div>
+    <div class="nx-testimonial-card nx-testimonial-parallax" data-speed="1.0">
+      <div class="nx-testimonial-quote">"</div>
+      <p class="nx-testimonial-text">Working with NEXUS felt like having an extension of our own team. Brilliant minds, incredible work ethic, and results that exceeded every expectation.</p>
+      <div class="nx-testimonial-author">
+        <div class="nx-testimonial-avatar" style="background:linear-gradient(135deg,#6c5ce7,#a29bfe)">MW</div>
+        <div class="nx-testimonial-info">
+          <h5>Marcus Webb</h5>
+          <span>Founder of Cirrus</span>
+        </div>
+      </div>
+    </div>
+    <div class="nx-testimonial-card nx-testimonial-parallax" data-speed="1.2">
+      <div class="nx-testimonial-quote">"</div>
+      <p class="nx-testimonial-text">They don't just deliver projects — they deliver experiences. Our users love it, and our metrics prove it. NEXUS is in a league of their own.</p>
+      <div class="nx-testimonial-author">
+        <div class="nx-testimonial-avatar" style="background:linear-gradient(135deg,#e056fd,#be2edd)">PP</div>
+        <div class="nx-testimonial-info">
+          <h5>Priya Patel</h5>
+          <span>VP Product at Vertex</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     18. AWARDS
+     ============================================================ -->
+<section class="nx-section nx-awards" id="awards">
+  <div class="section-eyebrow">RECOGNITION</div>
+  <h2>Recognition</h2>
+  <div class="nx-awards-grid">
+    <div class="nx-award-card">
+      <div class="nx-award-icon">🏆</div>
+      <h4>Awwwards SOTD</h4>
+      <div class="year">2023</div>
+      <div class="project">Aurora</div>
+    </div>
+    <div class="nx-award-card">
+      <div class="nx-award-icon">🌟</div>
+      <h4>CSS Design Awards</h4>
+      <div class="year">2024</div>
+      <div class="project">Vortex</div>
+    </div>
+    <div class="nx-award-card">
+      <div class="nx-award-icon">🎖️</div>
+      <h4>FWA of the Day</h4>
+      <div class="year">2023</div>
+      <div class="project">Echo</div>
+    </div>
+    <div class="nx-award-card">
+      <div class="nx-award-icon">🔴</div>
+      <h4>Red Dot Design</h4>
+      <div class="year">2024</div>
+      <div class="project">Meridian</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     19. TECH STACK
+     ============================================================ -->
+<section class="nx-section nx-techstack" id="techstack">
+  <div class="section-eyebrow">TECHNOLOGY</div>
+  <h2>Our Technology</h2>
+  <div class="nx-techstack-grid">
+    <div class="nx-techstack-category">
+      <h4>FRONTEND</h4>
+      <div class="nx-techstack-items">
+        <span class="nx-techstack-pill">React</span>
+        <span class="nx-techstack-pill">Vue</span>
+        <span class="nx-techstack-pill">TypeScript</span>
+        <span class="nx-techstack-pill">Next.js</span>
+        <span class="nx-techstack-pill">Svelte</span>
+      </div>
+    </div>
+    <div class="nx-techstack-category">
+      <h4>BACKEND</h4>
+      <div class="nx-techstack-items">
+        <span class="nx-techstack-pill">Node.js</span>
+        <span class="nx-techstack-pill">Python</span>
+        <span class="nx-techstack-pill">Go</span>
+        <span class="nx-techstack-pill">Rust</span>
+        <span class="nx-techstack-pill">GraphQL</span>
+      </div>
+    </div>
+    <div class="nx-techstack-category">
+      <h4>CLOUD</h4>
+      <div class="nx-techstack-items">
+        <span class="nx-techstack-pill">AWS</span>
+        <span class="nx-techstack-pill">GCP</span>
+        <span class="nx-techstack-pill">Vercel</span>
+        <span class="nx-techstack-pill">Cloudflare</span>
+        <span class="nx-techstack-pill">Docker</span>
+      </div>
+    </div>
+    <div class="nx-techstack-category">
+      <h4>AI/ML</h4>
+      <div class="nx-techstack-items">
+        <span class="nx-techstack-pill">PyTorch</span>
+        <span class="nx-techstack-pill">TensorFlow</span>
+        <span class="nx-techstack-pill">OpenAI</span>
+        <span class="nx-techstack-pill">LangChain</span>
+        <span class="nx-techstack-pill">Stable Diffusion</span>
+      </div>
+    </div>
+    <div class="nx-techstack-category">
+      <h4>DESIGN</h4>
+      <div class="nx-techstack-items">
+        <span class="nx-techstack-pill">Figma</span>
+        <span class="nx-techstack-pill">Framer</span>
+        <span class="nx-techstack-pill">After Effects</span>
+        <span class="nx-techstack-pill">Blender</span>
+        <span class="nx-techstack-pill">Cinema 4D</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     20. BLOG / INSIGHTS
+     ============================================================ -->
+<section class="nx-section nx-blog" id="blog">
+  <div class="section-eyebrow">INSIGHTS</div>
+  <h2>Latest Insights</h2>
+  <div class="nx-blog-grid">
+    <div class="nx-blog-card">
+      <div class="nx-blog-date">Jun 2025</div>
+      <h3>The Future of Web Animation</h3>
+      <p>How GSAP, CSS Houdini, and WebGL are reshaping the way we think about motion on the web. A deep dive into the tools and techniques defining the next era.</p>
+      <a href="#">Read More →</a>
+    </div>
+    <div class="nx-blog-card">
+      <div class="nx-blog-date">May 2025</div>
+      <h3>Building AI-Powered Design Tools</h3>
+      <p>Our journey creating Aurora — from initial concept to production deployment. The technical challenges, design decisions, and lessons learned along the way.</p>
+      <a href="#">Read More →</a>
+    </div>
+    <div class="nx-blog-card">
+      <div class="nx-blog-date">Apr 2025</div>
+      <h3>Why We Chose Rust for Our Backend</h3>
+      <p>Performance, safety, and developer experience. How migrating to Rust transformed our backend architecture and improved response times by 40%.</p>
+      <a href="#">Read More →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     21. BRANDS MARQUEE
+     ============================================================ -->
+<section class="nx-section nx-brands-marquee">
+  <div class="nx-brands-marquee-track">
+    <span class="nx-brand-item">TECHCO</span>
+    <span class="nx-brand-item">MERIDIAN</span>
+    <span class="nx-brand-item">LUMINARY</span>
+    <span class="nx-brand-item">NORDHAVEN</span>
+    <span class="nx-brand-item">VERTEX</span>
+    <span class="nx-brand-item">APEX</span>
+    <span class="nx-brand-item">CIRRUS</span>
+    <span class="nx-brand-item">HELION</span>
+    <span class="nx-brand-item">TECHCO</span>
+    <span class="nx-brand-item">MERIDIAN</span>
+    <span class="nx-brand-item">LUMINARY</span>
+    <span class="nx-brand-item">NORDHAVEN</span>
+    <span class="nx-brand-item">VERTEX</span>
+    <span class="nx-brand-item">APEX</span>
+    <span class="nx-brand-item">CIRRUS</span>
+    <span class="nx-brand-item">HELION</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     22. NUMBERS 2
+     ============================================================ -->
+<section class="nx-section nx-numbers2" id="numbers2">
+  <div class="nx-numbers2-inner">
+    <div class="nx-numbers2-left">
+      <div class="section-eyebrow">IMPACT</div>
+      <h2>Results That Speak</h2>
+      <p>Our work reaches millions of users worldwide. We measure success not just in aesthetics, but in performance, reliability, and user satisfaction.</p>
+    </div>
+    <div class="nx-numbers2-right">
+      <div class="nx-numbers2-card">
+        <div class="nx-stat-number"><span class="nx-count" data-target="2">0</span>M+</div>
+        <div class="nx-stat-label">END USERS</div>
+      </div>
+      <div class="nx-numbers2-card">
+        <div class="nx-stat-number"><span class="nx-count" data-target="150">0</span>ms</div>
+        <div class="nx-stat-label">AVG RESPONSE TIME</div>
+      </div>
+      <div class="nx-numbers2-card">
+        <div class="nx-stat-number"><span class="nx-count-decimal" data-target="4.9">0</span>★</div>
+        <div class="nx-stat-label">CLIENT SATISFACTION</div>
+      </div>
+      <div class="nx-numbers2-card">
+        <div class="nx-stat-number">24/7</div>
+        <div class="nx-stat-label">SUPPORT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     23. CTA
+     ============================================================ -->
+<section class="nx-section nx-cta" id="cta">
+  <h2>Have an Idea?</h2>
+  <p>We'd love to hear about your next project. Let's create something extraordinary together.</p>
+  <a href="#contact" class="nx-btn-primary">Start a Conversation</a>
+</section>
+
+<!-- ============================================================
+     24. CONTACT
+     ============================================================ -->
+<section class="nx-section nx-contact" id="contact">
+  <div class="section-eyebrow">GET IN TOUCH</div>
+  <h2>Let's Talk</h2>
+  <a href="mailto:hello@nexus.studio" class="nx-contact-email">hello@nexus.studio</a>
+  <div class="nx-contact-socials">
+    <a href="#" class="nx-contact-social" aria-label="GitHub">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+    </a>
+    <a href="#" class="nx-contact-social" aria-label="Twitter">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <a href="#" class="nx-contact-social" aria-label="Dribbble">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 24C5.385 24 0 18.615 0 12S5.385 0 12 0s12 5.385 12 12-5.385 12-12 12zm10.12-10.358c-.35-.11-3.17-.953-6.384-.438 1.34 3.684 1.887 6.684 1.992 7.308 2.3-1.555 3.936-4.02 4.395-6.87zm-6.115 7.808c-.153-.9-.75-4.032-2.19-7.77l-.066.02c-5.79 2.015-7.86 6.025-8.04 6.4 1.73 1.358 3.92 2.166 6.29 2.166 1.42 0 2.77-.29 4-.81zm-11.62-2.58c.232-.4 3.045-5.055 8.332-6.765.135-.045.27-.084.405-.12-.26-.585-.54-1.167-.832-1.74C7.17 11.775 2.206 11.71 1.756 11.7l-.004.312c0 2.633.998 5.037 2.634 6.855zm-2.42-8.955c.46.008 4.683.026 9.477-1.248-1.698-3.018-3.53-5.558-3.8-5.928-2.868 1.35-5.01 3.99-5.676 7.17zM9.6 2.052c.282.38 2.145 2.914 3.822 6 3.645-1.365 5.19-3.44 5.373-3.702A10.58 10.58 0 0012 1.764c-.825 0-1.63.1-2.4.288zm10.335 3.483c-.218.29-1.89 2.478-5.682 4.005.216.44.42.89.615 1.34.066.152.127.305.19.455 3.405-.427 6.793.26 7.13.33-.022-2.42-.86-4.64-2.25-6.13z"/></svg>
+    </a>
+    <a href="#" class="nx-contact-social" aria-label="LinkedIn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ============================================================
+     25. FOOTER
+     ============================================================ -->
+<footer class="nx-section nx-footer">
+  <p>&copy; 2025 NEXUS Studio. All rights reserved.</p>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ==========================================================
+     1. GSAP Registration
+     ========================================================== */
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+  /* ==========================================================
+     Theme Toggle
+     ========================================================== */
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    // Restore saved theme
+    if (localStorage.getItem('nexus-theme') === 'light') {
+      document.body.classList.add('light-mode');
+      themeToggle.textContent = '🌙';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      themeToggle.textContent = isLight ? '🌙' : '☀️';
+      localStorage.setItem('nexus-theme', isLight ? 'light' : 'dark');
+
+      // Update Three.js particle color
+      if (typeof textMat !== 'undefined') {
+        textMat.uniforms.uColor.value.set(
+          isLight ? 0.2 : 0.4,
+          isLight ? 0.35 : 0.6,
+          isLight ? 0.8 : 1.0
+        );
+      }
+
+      // Refresh ScrollTrigger
+      ScrollTrigger.refresh();
+    });
+  }
+
+  /* ==========================================================
+     2. Mobile Detection
+     ========================================================== */
+  const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+  /* Global mouse tracking for WebGL liquid effect */
+  var mouseX = 0, mouseY = 0;
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  }, { passive: true });
+
+  /* ==========================================================
+     3. Cursor Trail Animation
+     ========================================================== */
+  if (!isMobile) {
+    const dot = document.getElementById('cursorDot');
+    const glow = document.getElementById('cursorGlow');
+    const trail = document.getElementById('cursorTrail');
+    let dotX = 0, dotY = 0;
+    let glowX = 0, glowY = 0;
+    let trailX = 0, trailY = 0;
+
+    function animateCursor() {
+      dotX += (mouseX - dotX) * 0.3;
+      dotY += (mouseY - dotY) * 0.3;
+      glowX += (mouseX - glowX) * 0.08;
+      glowY += (mouseY - glowY) * 0.08;
+      trailX += (mouseX - trailX) * 0.15;
+      trailY += (mouseY - trailY) * 0.15;
+
+      dot.style.transform = 'translate(' + (dotX - 4) + 'px, ' + (dotY - 4) + 'px)';
+      glow.style.transform = 'translate(' + (glowX - 140) + 'px, ' + (glowY - 140) + 'px)';
+      trail.style.transform = 'translate(' + (trailX - 2) + 'px, ' + (trailY - 2) + 'px)';
+
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+  }
+
+  /* ==========================================================
+     4. WebGL -- 3D Particle Field
+     ========================================================== */
+  const canvas = document.getElementById('nx-webgl');
+  let renderer, scene, camera;
+  let particleSystem;
+  let liquidMat;
+  const PARTICLE_COUNT = isMobile ? 600 : 1500;
+
+  function initWebGL() {
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: false });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+      camera.position.z = 300;
+
+      /* --- 3D Particle Field --- */
+      var positions = new Float32Array(PARTICLE_COUNT * 3);
+      var colors = new Float32Array(PARTICLE_COUNT * 3);
+
+      for (var i = 0; i < PARTICLE_COUNT; i++) {
+        var i3 = i * 3;
+        positions[i3] = (Math.random() - 0.5) * 800;
+        positions[i3 + 1] = (Math.random() - 0.5) * 600;
+        positions[i3 + 2] = (Math.random() - 0.5) * 600;
+        var brightness = 0.15 + Math.random() * 0.35;
+        colors[i3] = 0.25 * brightness;
+        colors[i3 + 1] = 0.35 * brightness;
+        colors[i3 + 2] = brightness;
+      }
+
+      var pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      pGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      var pMat = new THREE.PointsMaterial({
+        size: 1.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.25,
+        depthWrite: false,
+        sizeAttenuation: true
+      });
+
+      particleSystem = new THREE.Points(pGeo, pMat);
+      scene.add(particleSystem);
+
+      
+
+      /* --- Liquid distortion plane --- */
+      var liquidGeo = new THREE.PlaneGeometry(40, 40, 32, 32);
+      liquidMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uTime: { value: 0 },
+          uMouse: { value: new THREE.Vector2(0, 0) }
+        },
+        vertexShader: `
+          uniform float uTime;
+          uniform vec2 uMouse;
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            vec3 pos = position;
+            pos.z += sin(pos.x * 0.5 + uTime * 0.5) * 0.15;
+            pos.z += cos(pos.y * 0.4 + uTime * 0.3) * 0.12;
+            float dist = length(pos.xy - uMouse * 20.0);
+            pos.z += sin(dist * 2.0 - uTime * 3.0) * 0.2 * smoothstep(8.0, 0.0, dist);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform float uTime;
+          varying vec2 vUv;
+          void main() {
+            float alpha = 0.03;
+            vec3 color = mix(vec3(0.2, 0.4, 1.0), vec3(0.6, 0.2, 1.0), vUv.x);
+            gl_FragColor = vec4(color, alpha);
+          }
+        `,
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+      var liquidPlane = new THREE.Mesh(liquidGeo, liquidMat);
+      liquidPlane.position.z = -5;
+      scene.add(liquidPlane);
+
+      /* Mouse parallax */
+      canvas.addEventListener('mousemove', function(e) {
+        var mX = (e.clientX / window.innerWidth - 0.5) * 2;
+        var mY = -(e.clientY / window.innerHeight - 0.5) * 2;
+        camera.position.x += (mX * 15 - camera.position.x) * 0.02;
+        camera.position.y += (mY * 10 - camera.position.y) * 0.02;
+        camera.lookAt(0, 0, 0);
+      });
+
+    } catch(e) {
+      canvas.style.display = 'none';
+    }
+  }
+
+  function renderWebGL() {
+    if (!renderer) return;
+    var time = performance.now() * 0.001;
+
+    if (particleSystem) {
+      particleSystem.rotation.y = time * 0.008;
+      particleSystem.rotation.x = Math.sin(time * 0.02) * 0.1;
+    }
+    if (liquidMat) {
+      liquidMat.uniforms.uTime.value = time;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  function animateWebGL() {
+    requestAnimationFrame(animateWebGL);
+    renderWebGL();
+  }
+
+  function setupWebGLVisibility() {
+    /* WebGL runs globally */
+  }/* ==========================================================
+     5. IntersectionObserver for WebGL Pause
+     ========================================================== */
+  function setupWebGLVisibility() {
+    /* WebGL runs globally — no IntersectionObserver pause */
+  }
+
+  /* ==========================================================
+     6. Loading Sequence
+     ========================================================== */
+  function hideLoading() {
+    var loader = document.getElementById('nxLoading');
+    setTimeout(function() {
+      loader.classList.add('hidden');
+      setTimeout(function() {
+        loader.style.display = 'none';
+        startAnimations();
+      }, 600);
+    }, 600);
+  }
+
+  /* ==========================================================
+     7. Smooth Scroll for Nav Links
+     ========================================================== */
+  document.querySelectorAll('.nx-nav-links a, .nx-btn-primary[href^="#"], .nx-btn-ghost[href^="#"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      var href = this.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        var target = document.querySelector(href);
+        if (target) {
+          gsap.to(window, {
+            scrollTo: { y: target, offsetY: 0 },
+            duration: 1,
+            ease: 'power3.inOut'
+          });
+        }
+      }
+    });
+  });
+
+  /* ==========================================================
+     8. Nav Theme Switching + Progress Bar
+     ========================================================== */
+  function updateNavTheme() {
+    var nav = document.querySelector('.nx-nav');
+    if (!nav) return;
+    var isLight = document.body.classList.contains('light-mode');
+    nav.classList.toggle('scrolled', window.scrollY > 80);
+    // In light mode, always light nav. In dark mode, always dark nav.
+    nav.classList.toggle('nx-nav-dark', !isLight);
+    nav.classList.toggle('nx-nav-light', isLight);
+  }
+
+  function updateProgress() {
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var scrolled = window.scrollY;
+    var progress = (scrolled / docHeight) * 100;
+    document.getElementById('nxProgress').style.width = progress + '%';
+  }
+
+  window.addEventListener('scroll', function() {
+    updateNavTheme();
+    updateProgress();
+  }, { passive: true });
+
+  /* ==========================================================
+     9. Main Animations (startAnimations)
+     ========================================================== */
+  function startAnimations() {
+
+    /* --- Hero Text Reveal --- */
+    var heroTl = gsap.timeline();
+    heroTl.from('.nx-hero-title', { opacity: 0, y: 60, duration: 1.2, ease: 'power3.out' })
+          .from('.nx-hero-subtitle', { opacity: 0, y: 40, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+          .from('.nx-hero-ctas', { opacity: 0, y: 30, duration: 0.8, ease: 'power3.out' }, '-=0.4');
+
+    /* --- Hero Scroll Scatter --- */
+    ScrollTrigger.create({
+      trigger: '.nx-hero',
+      start: 'top top',
+      end: '50% top',
+      scrub: 0.5,
+      onUpdate: function(self) {
+        window.__heroScrollProgress = self.progress;
+      },
+      animation: gsap.timeline()
+        .to('.nx-hero-title', { opacity: 0, scale: 1.2, filter: 'blur(10px)', ease: 'none' })
+        .to('.nx-hero-subtitle', { opacity: 0, y: -30, ease: 'none' }, 0)
+        .to('.nx-hero-ctas', { opacity: 0, y: -20, ease: 'none' }, 0)
+    });
+
+    /* --- Manifesto Pinned --- */
+    var manifestoSentences = document.querySelectorAll('.nx-manifesto-sentence');
+    var manifestoTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-manifesto',
+        start: 'top top',
+        end: '+=' + (manifestoSentences.length * 100) + '%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+
+    manifestoSentences.forEach(function(sentence, i) {
+      manifestoTl.from(sentence, { opacity: 0, y: 40, duration: 1, ease: 'none' });
+      if (i < manifestoSentences.length - 1) {
+        manifestoTl.to(sentence, { opacity: 0, y: -40, duration: 0.5, ease: 'none' });
+      }
+    });
+
+    /* --- Stats Pinned --- */
+    var statCards = document.querySelectorAll('.nx-stat-card');
+    var statsTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-stats',
+        start: 'top top',
+        end: '+=300%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    // Left side text
+    statsTl.from('.nx-stats .section-eyebrow', { opacity: 0, x: -40, duration: 0.5, ease: 'power3.out' });
+    statsTl.from('.nx-stats h2', { opacity: 0, x: -40, duration: 0.5, ease: 'power3.out' });
+    statsTl.from('.nx-stats-left p', { opacity: 0, x: -40, duration: 0.5, ease: 'power3.out' });
+    // Stat blocks one by one
+    statCards.forEach(function(block, i) {
+      var xDir = i % 2 === 0 ? 60 : -60;
+      statsTl.from(block, { opacity: 0, x: xDir, y: 30, duration: 0.6, ease: 'power3.out' }, '-=0.2');
+      // Trigger count animation
+      statsTl.call(function() {
+        var countEls = block.querySelectorAll('.nx-count, .nx-count-decimal');
+        countEls.forEach(function(el) {
+          var isDecimal = el.classList.contains('nx-count-decimal');
+          var target = isDecimal ? parseFloat(el.getAttribute('data-target')) : parseInt(el.getAttribute('data-target'));
+          var obj = { val: 0 };
+          gsap.to(obj, {
+            val: target,
+            duration: 1.5,
+            ease: 'power2.out',
+            onUpdate: function() {
+              el.textContent = isDecimal ? obj.val.toFixed(1) : Math.round(obj.val);
+            }
+          });
+        });
+      });
+    });
+
+    /* --- Work Intro (Pinned) --- */
+    var workIntroTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-work-intro',
+        start: 'top top',
+        end: '+=120%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    workIntroTl.from('.nx-work-intro .section-eyebrow', { opacity: 0, y: -20, duration: 0.4 });
+    workIntroTl.from('.nx-work-intro h2', { opacity: 0, y: 30, duration: 0.5 });
+    workIntroTl.from('.nx-work-intro p', { opacity: 0, y: 20, duration: 0.4 });
+
+    /* --- Work Showcase Reveals (Pinned) --- */
+    document.querySelectorAll('.nx-showcase').forEach(function(section) {
+      var tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: '+=150%',
+          pin: true,
+          scrub: 0.5
+        }
+      });
+
+      var number = section.querySelector('.nx-showcase-number');
+      var tag = section.querySelector('.nx-showcase-tag');
+      var title = section.querySelector('.nx-showcase-title');
+      var desc = section.querySelector('.nx-showcase-desc');
+      var visual = section.querySelector('.nx-showcase-visual');
+
+      if (number) tl.from(number, { opacity: 0, scale: 1.5, duration: 0.5 });
+      if (tag) tl.from(tag, { opacity: 0, x: -30, duration: 0.4 }, '-=0.2');
+      if (title) tl.from(title, { opacity: 0, x: -80, duration: 0.6 }, '-=0.2');
+      if (desc) tl.from(desc, { opacity: 0, x: -40, duration: 0.5 }, '-=0.2');
+      if (visual) tl.from(visual, { opacity: 0, scale: 0.85, x: 60, duration: 0.8 }, 0);
+    });
+
+    /* --- Projects Horizontal Scroll --- */
+    var projectsTrack = document.getElementById('projectsTrack');
+    if (projectsTrack) {
+      var projectCards = projectsTrack.querySelectorAll('.nx-project-card');
+      var projectsWidth = projectsTrack.scrollWidth - window.innerWidth + 160;
+
+      gsap.to(projectsTrack, {
+        x: -projectsWidth,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.nx-projects-track-wrapper',
+          start: 'top top',
+          end: function() { return '+=' + (projectsTrack.scrollWidth - window.innerWidth); },
+          pin: true,
+          scrub: 1
+        }
+      });
+
+      projectCards.forEach(function(card) {
+        gsap.from(card, {
+          y: 60,
+          rotation: gsap.utils.random(-3, 3),
+          opacity: 0,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: gsap.to(projectsTrack, { x: -projectsWidth }),
+            start: 'left 90%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+    }
+
+    /* --- Workflow Horizontal Scroll --- */
+    var workflowTrack = document.getElementById('workflowTrack');
+    if (workflowTrack) {
+      var wfCards = workflowTrack.querySelectorAll('.nx-workflow-card');
+      var wfWidth = workflowTrack.scrollWidth - window.innerWidth + 160;
+
+      gsap.to(workflowTrack, {
+        x: -wfWidth,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.nx-workflow-track-wrapper',
+          start: 'top top',
+          end: function() { return '+=' + (workflowTrack.scrollWidth - window.innerWidth); },
+          pin: true,
+          scrub: 1
+        }
+      });
+
+      wfCards.forEach(function(card, i) {
+        gsap.from(card, {
+          y: 80,
+          opacity: 0,
+          duration: 0.6,
+          delay: i * 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: gsap.to(workflowTrack, { x: -wfWidth }),
+            start: 'left 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+    }
+
+    /* --- About Pinned --- */
+    var aboutLines = document.querySelectorAll('.nx-about-content p');
+    var aboutTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-about',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    aboutTl.from('.nx-about-visual', { opacity: 0, x: -80, rotation: -3, duration: 0.8, ease: 'power3.out' });
+    aboutLines.forEach(function(line, i) {
+      aboutTl.from(line, { opacity: 0, x: -40, y: 20, duration: 0.5, ease: 'power3.out' }, '-=0.1');
+    });
+
+    /* --- Philosophy Pinned --- */
+    var philWords = [
+      document.getElementById('philWord1'),
+      document.getElementById('philWord2'),
+      document.getElementById('philWord3')
+    ];
+
+    var philTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-philosophy',
+        start: 'top top',
+        end: '+=' + (philWords.length * 100) + '%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+
+    philWords.forEach(function(word, i) {
+      if (i > 0) {
+        philTl.to(philWords[i - 1], { opacity: 0, scale: 0.8, duration: 0.3, ease: 'none' });
+      }
+      philTl.from(word, { opacity: 0, scale: 0.8, duration: 0.7, ease: 'none' });
+    });
+
+    /* --- Skills Grid --- */
+    var skillCards = document.querySelectorAll('.nx-skill-card');
+    var skillsTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-skills',
+        start: 'top top',
+        end: '+=200%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    skillsTl.from('.nx-skills .section-eyebrow', { opacity: 0, y: 20, duration: 0.3, ease: 'power3.out' });
+    skillsTl.from('.nx-skills h2', { opacity: 0, y: 20, duration: 0.3, ease: 'power3.out' });
+    skillsTl.from('.nx-skills > .subtitle', { opacity: 0, y: 15, duration: 0.3, ease: 'power3.out' }, '-=0.1');
+    skillCards.forEach(function(card, i) {
+      skillsTl.from(card, {
+        opacity: 0,
+        y: 30,
+        duration: 0.4,
+        ease: 'power3.out'
+      }, '-=0.25');
+    });
+
+    /* --- Team (Pinned) --- */
+    var teamCards = document.querySelectorAll('.nx-team-card');
+    var teamTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-team',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    teamTl.from('.nx-team .section-eyebrow', { opacity: 0, y: -20, duration: 0.4 });
+    teamTl.from('.nx-team h2', { opacity: 0, y: 30, duration: 0.5 });
+    teamTl.from('.nx-team > .subtitle', { opacity: 0, y: 20, duration: 0.4 });
+    teamCards.forEach(function(card, i) {
+      var row = Math.floor(i / 4);
+      var col = i % 4;
+      var xDir = col < 2 ? -40 : 40;
+      teamTl.from(card, { opacity: 0, x: xDir, y: 30, scale: 0.9, duration: 0.5 }, '-=0.3');
+    });
+
+    /* --- Values Pinned --- */
+    var valueItems = [
+      document.getElementById('value1'),
+      document.getElementById('value2'),
+      document.getElementById('value3')
+    ];
+
+    var valuesTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-values',
+        start: 'top top',
+        end: '+=' + (valueItems.length * 100) + '%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+
+    valueItems.forEach(function(item, i) {
+      if (i > 0) {
+        valuesTl.to(valueItems[i - 1], { opacity: 0, y: -30, duration: 0.3, ease: 'none' });
+      }
+      valuesTl.from(item, { opacity: 0, y: 40, duration: 0.7, ease: 'none' });
+    });
+
+    /* --- Timeline Horizontal Scroll --- */
+    var timelineTrack = document.getElementById('timelineTrack');
+    if (timelineTrack) {
+      var tlCards = timelineTrack.querySelectorAll('.nx-timeline-card');
+      var tlWidth = timelineTrack.scrollWidth - window.innerWidth + 160;
+
+      gsap.to(timelineTrack, {
+        x: -tlWidth,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.nx-timeline-track-wrapper',
+          start: 'top top',
+          end: function() { return '+=' + (timelineTrack.scrollWidth - window.innerWidth); },
+          pin: true,
+          scrub: 1
+        }
+      });
+
+      tlCards.forEach(function(card, i) {
+        gsap.from(card, {
+          y: 60,
+          opacity: 0,
+          duration: 0.6,
+          delay: i * 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: gsap.to(timelineTrack, { x: -tlWidth }),
+            start: 'left 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+    }
+
+    /* --- Testimonials Pinned --- */
+    var testCards = document.querySelectorAll('.nx-testimonial-parallax');
+    var testTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-testimonials',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    testTl.from('.nx-testimonials h2', { opacity: 0, y: 30, duration: 0.5, ease: 'power3.out' });
+    testCards.forEach(function(card, i) {
+      testTl.from(card, { opacity: 0, y: 80, scale: 0.95, duration: 0.7, ease: 'power3.out' }, '-=0.3');
+    });
+
+    /* --- Awards Pinned --- */
+    var awardCards = document.querySelectorAll('.nx-award-card');
+    var awardsTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-awards',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    awardsTl.from('.nx-awards h2', { opacity: 0, y: 30, duration: 0.5, ease: 'power3.out' });
+    awardCards.forEach(function(card, i) {
+      var xDir = i % 2 === 0 ? -80 : 80;
+      var rot = i % 2 === 0 ? -3 : 3;
+      awardsTl.from(card, { opacity: 0, x: xDir, rotation: rot, duration: 0.6, ease: 'power3.out' }, '-=0.2');
+    });
+
+    /* --- Tech Stack Pinned --- */
+    var techCategories = document.querySelectorAll('.nx-techstack-category');
+    var techTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-techstack',
+        start: 'top top',
+        end: '+=300%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    techTl.from('.nx-techstack h2', { opacity: 0, y: 30, duration: 0.5, ease: 'power3.out' });
+    techCategories.forEach(function(cat) {
+      var h4 = cat.querySelector('h4');
+      var pills = cat.querySelectorAll('.nx-techstack-pill');
+      techTl.from(h4, { opacity: 0, x: -30, duration: 0.4, ease: 'power3.out' });
+      techTl.from(pills, { opacity: 0, scale: 0.8, y: 10, stagger: 0.05, duration: 0.3, ease: 'power3.out' }, '-=0.1');
+    });
+
+    /* --- Blog Pinned --- */
+    var blogCards = document.querySelectorAll('.nx-blog-card');
+    var blogTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-blog',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    blogTl.from('.nx-blog h2', { opacity: 0, y: 30, duration: 0.5, ease: 'power3.out' });
+    blogCards.forEach(function(card, i) {
+      blogTl.from(card, { opacity: 0, x: 100, rotation: 2, duration: 0.6, ease: 'power3.out' }, '-=0.2');
+    });
+
+    /* --- Brands Marquee (Pinned) --- */
+    var brandsTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-brands-marquee',
+        start: 'top top',
+        end: '+=120%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    brandsTl.from('.nx-brands-marquee .nx-brands-marquee-track', { opacity: 0, x: 100, duration: 0.6 });
+
+    /* --- Numbers 2 Pinned --- */
+    var n2Cards = document.querySelectorAll('.nx-numbers2-card');
+    var num2Tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-numbers2',
+        start: 'top top',
+        end: '+=250%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    num2Tl.from('.nx-numbers2 h2', { opacity: 0, y: 30, duration: 0.5, ease: 'power3.out' });
+    n2Cards.forEach(function(block, i) {
+      num2Tl.from(block, { opacity: 0, rotationX: 90, y: 40, duration: 0.7, ease: 'power3.out' }, '-=0.3');
+      // Trigger count animation
+      num2Tl.call(function() {
+        var countEls = block.querySelectorAll('.nx-count, .nx-count-decimal');
+        countEls.forEach(function(el) {
+          var isDecimal = el.classList.contains('nx-count-decimal');
+          var target = isDecimal ? parseFloat(el.getAttribute('data-target')) : parseInt(el.getAttribute('data-target'));
+          var obj = { val: 0 };
+          gsap.to(obj, {
+            val: target,
+            duration: 1.5,
+            ease: 'power2.out',
+            onUpdate: function() {
+              el.textContent = isDecimal ? obj.val.toFixed(1) : Math.round(obj.val);
+            }
+          });
+        });
+      });
+    });
+
+    /* --- CTA (Pinned) --- */
+    var ctaTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-cta',
+        start: 'top top',
+        end: '+=150%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    ctaTl.from('.nx-cta h2', { opacity: 0, y: 40, scale: 0.95, duration: 0.7 });
+    ctaTl.from('.nx-cta p', { opacity: 0, y: 20, duration: 0.5 }, '-=0.3');
+    ctaTl.from('.nx-cta .nx-btn-primary', { opacity: 0, y: 15, duration: 0.4 }, '-=0.2');
+
+    /* --- Contact (Pinned) --- */
+    var contactTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.nx-contact',
+        start: 'top top',
+        end: '+=150%',
+        pin: true,
+        scrub: 0.5
+      }
+    });
+    contactTl.from('.nx-contact .section-eyebrow', { opacity: 0, y: -20, duration: 0.4 });
+    contactTl.from('.nx-contact h2', { opacity: 0, y: 30, duration: 0.5 });
+    contactTl.from('.nx-contact-email', { opacity: 0, y: 20, duration: 0.4 });
+    contactTl.from('.nx-contact-social', { opacity: 0, y: 20, scale: 0.9, stagger: 0.1, duration: 0.4 });
+
+    /* --- Footer --- */
+    gsap.from('.nx-footer p', {
+      scrollTrigger: { trigger: '.nx-footer', start: 'top 95%' },
+      opacity: 0,
+      y: 20,
+      duration: 0.8,
+      ease: 'power3.out'
+    });
+
+  } /* end startAnimations */
+
+  /* ==========================================================
+     10. ScrollTrigger Refresh on Resize
+     ========================================================== */
+  var resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      ScrollTrigger.refresh();
+      if (renderer) {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+      }
+    }, 250);
+  });
+
+  /* ==========================================================
+     INITIALIZATION
+     ========================================================== */
+  window.addEventListener('DOMContentLoaded', function() {
+    initWebGL();
+    animateWebGL();
+    setupWebGLVisibility();
+    hideLoading();
+  });
+
+})();
+</script>
+
+
+</body>
+</html>
+
